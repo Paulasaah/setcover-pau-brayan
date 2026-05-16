@@ -81,7 +81,7 @@ Lesiones vasculares (vasc)       &   142   &  1.42\% \\
 
 Desde la perspectiva de la optimización combinatoria, este problema fue identificado por Karp \cite{karp1972} en 1972 como uno de los 21 problemas NP-completos originales. La caracterización formal de esta clase de complejidad y sus implicaciones algorítmicas se sistematiza exhaustivamente en Garey y Johnson \cite{garey1979}. Su pertenencia a esta clase significa que no se conoce ningún algoritmo capaz de resolverlo en tiempo polinomial para el caso general. Para una instancia con $n=500$ subconjuntos, el espacio de búsqueda contiene $2^{500} \approx 3.27 \times 10^{150}$ configuraciones, lo que descarta cualquier búsqueda exhaustiva.
 
-La instancia trabajada presenta las siguientes características estructurales: densidad de la matriz de incidencia del 9.99\% (24{,}971 unos sobre 250{,}000 posibles); cada elemento del universo es cubierto por entre 32 y 70 subconjuntos distintos (media 49.9); el costo total de seleccionar todos los subconjuntos sería \$1{,}516{,}821; y la cota inferior de la relajación lineal es \$27{,}859.93, lo que anticipa una brecha de integralidad cercana al 44\%.
+La instancia trabajada presenta las siguientes características estructurales: densidad de la matriz de incidencia del 9.99\% (24{,}971 unos sobre 250{,}000 posibles); cada elemento del universo es cubierto por entre 32 y 70 subconjuntos distintos (media 49.9); el costo total de seleccionar todos los subconjuntos sería \$1{,}516{,}821; y la cota inferior de la relajación lineal es \$27{,}859.93, lo que anticipa un gap de integralidad cercano al 43\%.
 
 La literatura especializada ha abordado el SCP desde múltiples perspectivas. Chvátal \cite{chvatal1979} demostró que la heurística \textit{greedy} ofrece una garantía de aproximación logarítmica respecto al óptimo. Caprara, Fischetti y Toth \cite{caprara1999} desarrollaron métodos basados en relajación lagrangiana que producen cotas inferiores más ajustadas. Beasley y Chu \cite{beasley1996} demostraron que un Algoritmo Genético con operador de reparación puede alcanzar soluciones con brecha inferior al 2\% respecto al óptimo exacto en instancias de referencia de la OR-Library, estableciendo el diseño que se adopta en este trabajo. Aickelin \cite{aickelin2002} exploró variantes indirectas del AG para instancias con estructura particular.
 
@@ -147,7 +147,7 @@ p_m(g) = 0.030 + (0.005 - 0.030) \cdot \frac{g-1}{G-1}
 desde 3\% en la generación 1 hasta 0.5\% en la generación $G=500$.
 
 \subsection{Operador de reparación (componente crítico)}
-Después de cruce y mutación, se aplica reparación en dos fases \cite{beasley1996}: (a) si quedan elementos sin cubrir, se añaden subconjuntos según la regla \textit{greedy} de Chvátal \cite{chvatal1979} (mejor razón costo/cobertura nueva); (b) se eliminan subconjuntos redundantes en orden de costo decreciente. Sin este operador, la brecha del AG queda entre 5\% y 10\%; con él, por debajo del 2\%.
+Después de cruce y mutación, se aplica reparación en dos fases \cite{beasley1996}: (a) si quedan elementos sin cubrir, se añaden subconjuntos según la regla \textit{greedy} de Chvátal \cite{chvatal1979} (mejor razón costo/cobertura nueva); (b) se eliminan subconjuntos redundantes en orden de costo decreciente. Sin este operador, la brecha del AG queda típicamente entre 5\% y 10\% \cite{beasley1996}; con él, las brechas reportadas en la literatura para instancias estándar de la OR-Library quedan por debajo del 2\%, y en este trabajo se obtuvieron entre 0\% y 3.55\% en las cinco semillas evaluadas.
 
 \subsection{Elitismo}
 Los 3 mejores individuos pasan directamente a la siguiente generación, garantizando convergencia monótona.
@@ -217,7 +217,7 @@ La Tabla~\ref{tab:robust} presenta los resultados de las cinco corridas independ
 \end{tabular}
 \end{table}
 
-La variabilidad relativa (CV) inferior al 1\% confirma que el AG es estable y reproducible. La Figura~\ref{fig:robust} ilustra gráficamente la dispersión.
+La variabilidad relativa (CV) del 1.37\% confirma que el AG es estable y reproducible: ninguna semilla se desvía más del 4\% del óptimo, y dos de las cinco corridas alcanzan brechas inferiores al 2.5\%. La Figura~\ref{fig:robust} ilustra gráficamente la dispersión.
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\columnwidth]{figures/fig_robustez.png}}
@@ -234,7 +234,7 @@ La variabilidad relativa (CV) inferior al 1\% confirma que el AG es estable y re
 \toprule
 \textbf{Método} & \textbf{Costo (\$)} & \textbf{$|S|$} & \textbf{Tiempo (s)} & \textbf{Gap} \\
 \midrule
-LP Relajado        & 27{,}859.93        & ---            & $<1$               & $-44\%$ \\
+LP Relajado        & \$27{,}859.93      & ---            & $0.4$              & $-43.20\%$ \\
 Greedy Chvátal     & \$52{,}063  & 23 & $<0.01$ & $+6.14\%$ \\
 Algoritmo Genético & \$49{,}051  & 22 & 57.1     & $0.00\%$ \\
 \textbf{ILP (CBC + B\&B, refinado)} & \$49{,}051 & 22 & 1200.2 & \textbf{ref.} \\
@@ -254,7 +254,7 @@ La Figura~\ref{fig:times} ilustra la diferencia de tiempos en escala logarítmic
 
 Los resultados muestran una complementariedad importante entre los enfoques exacto y metaheurístico, y arrojan un hallazgo central para la práctica del SCP en instancias de gap de integralidad elevado.
 
-En primer lugar, el solver CBC ejecutado con configuración estándar (límite de 600~s, tolerancia de gap relativo $10^{-4}$) reportó como ``Optimal'' una solución de \$50,123 con 22 subconjuntos. Sin embargo, esa solución no era el óptimo entero verdadero: al alcanzarse el límite de tiempo dentro del árbol de \textit{Branch and Bound}, el criterio de convergencia relativa del solver clasificó la mejor solución encontrada como óptima cuando aún quedaba mejora factible por explorar. Esto es consistente con el alto \textit{gap} de integralidad cercano al 44\% de la instancia, característico de problemas SCP densos \cite{caprara1999}: la relajación LP se separa fuertemente del espacio entero, lo que obliga a una exploración muy profunda del árbol.
+En primer lugar, el solver CBC ejecutado con configuración estándar (límite de 600~s, tolerancia de gap relativo $10^{-4}$) reportó como ``Optimal'' una solución de \$50,123 con 22 subconjuntos. Sin embargo, esa solución no era el óptimo entero verdadero: al alcanzarse el límite de tiempo dentro del árbol de \textit{Branch and Bound}, el criterio de convergencia relativa del solver clasificó la mejor solución encontrada como óptima cuando aún quedaba mejora factible por explorar. Esto es consistente con el alto \textit{gap} de integralidad del 43.20\% de la instancia, característico de problemas SCP densos \cite{caprara1999}: la relajación LP se separa fuertemente del espacio entero, lo que obliga a una exploración muy profunda del árbol.
 
 En segundo lugar, el Algoritmo Genético con semilla 13 alcanzó una solución factible de \$49,051 con 22 subconjuntos en 57~s, superando en \$1,072 (2.18\%) al resultado entregado por el solver exacto bajo su configuración estándar. Esta solución cubre los 500 elementos del universo, como se verificó \textit{a posteriori}, lo que motivó re-ejecutar el modelo PLE en un escenario refinado: \textit{warm-start} con la solución del AG, tolerancia de gap relativo igual a cero y límite de tiempo extendido a 1200~s. Bajo esta configuración el solver confirmó \$49,051 como óptimo entero verdadero, lo que valida tanto la calidad de la solución del AG como la hipótesis sobre la convergencia prematura del ILP estándar.
 
@@ -268,7 +268,7 @@ Desde la perspectiva aplicada al problema dermatológico, este resultado sugiere
 \item La complejidad NP-difícil del SCP es medible: la brecha de integralidad del 43\% confirma alta dificultad combinatoria de la instancia y un árbol de \textit{Branch and Bound} extenso.
 \item El Algoritmo Genético con operador de reparación alcanzó el óptimo entero verdadero (\$49,051) en 57~s con la semilla 13, superando al solver exacto bajo su configuración estándar de 600~s, que reportó una solución subóptima (\$50,123) como ``Optimal'' por su criterio de gap relativo.
 \item La confirmación del óptimo mediante PLE requirió \textit{warm-start} desde la solución del AG, tolerancia nula y 1200~s de tiempo, evidenciando que en instancias densas del SCP el método exacto necesita configuración fina y tiempo extendido para garantizar optimalidad.
-\item El operador de reparación es el componente decisivo del AG: sin él, las brechas reportadas en la literatura quedan entre 5\% y 10\%; con él, las cinco semillas evaluadas dieron gaps entre 0\% y 3.55\%, con CV inferior al 1.4\%.
+\item El operador de reparación es el componente decisivo del AG: sin él, las brechas reportadas en la literatura quedan entre 5\% y 10\%; con él, las cinco semillas evaluadas dieron gaps entre 0\% y 3.55\%, con un coeficiente de variación del 1.37\%.
 \item El AG ofrece el mejor balance calidad-velocidad para aplicaciones con restricciones de tiempo, y la formulación SCP es directamente extensible al HAM10000 completo como trabajo futuro.
 \end{itemize}
 
