@@ -1,0 +1,38 @@
+{
+  "comparison": [
+    {
+      "metodo": "LP Relajado",
+      "tipo": "Cota inferior te\u00f3rica",
+      "costo": 27859.92657877791,
+      "n_selected": null,
+      "time_s": null,
+      "gap_vs_ilp": -0.4441688131441073
+    },
+    {
+      "metodo": "Greedy Chv\u00e1tal",
+      "tipo": "Heur\u00edstica constructiva",
+      "costo": 52063.0,
+      "n_selected": 23,
+      "time_s": 0.004626750946044922,
+      "gap_vs_ilp": 0.03870478622588432
+    },
+    {
+      "metodo": "Algoritmo Gen\u00e9tico (seed 13)",
+      "tipo": "Metaheur\u00edstica poblacional",
+      "costo": 49051.0,
+      "n_selected": 22,
+      "time_s": 56.00508093833923,
+      "gap_vs_ilp": -0.021387387027911337
+    },
+    {
+      "metodo": "ILP (CBC + B&B)",
+      "tipo": "Exacto",
+      "costo": 50123.0,
+      "n_selected": 22,
+      "time_s": 600.9457840919495,
+      "gap_vs_ilp": 0.0,
+      "status": "Optimal"
+    }
+  ],
+  "ilp_status": "Optimal"
+}
