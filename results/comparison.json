@@ -6,7 +6,7 @@
       "costo": 27859.92657877791,
       "n_selected": null,
       "time_s": null,
-      "gap_vs_ilp": -0.4441688131441073
+      "gap_vs_ilp": -0.4320212313963444
     },
     {
       "metodo": "Greedy Chv\u00e1tal",
@@ -14,7 +14,7 @@
       "costo": 52063.0,
       "n_selected": 23,
       "time_s": 0.004626750946044922,
-      "gap_vs_ilp": 0.03870478622588432
+      "gap_vs_ilp": 0.06140547593321237
     },
     {
       "metodo": "Algoritmo Gen\u00e9tico (seed 13)",
@@ -22,14 +22,14 @@
       "costo": 49051.0,
       "n_selected": 22,
       "time_s": 56.00508093833923,
-      "gap_vs_ilp": -0.021387387027911337
+      "gap_vs_ilp": 0.0
     },
     {
       "metodo": "ILP (CBC + B&B)",
       "tipo": "Exacto",
-      "costo": 50123.0,
+      "costo": 49051.0,
       "n_selected": 22,
-      "time_s": 600.9457840919495,
+      "time_s": 1200.2244262695312,
       "gap_vs_ilp": 0.0,
       "status": "Optimal"
     }

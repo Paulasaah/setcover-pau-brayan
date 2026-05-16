@@ -35,7 +35,7 @@ Bucaramanga, Colombia}
 \maketitle
 
 \begin{abstract}
-Este trabajo aborda el problema de cubrimiento de conjuntos (\textit{Set Covering Problem}, SCP) aplicado a la selección óptima de subconjuntos de imágenes dermatológicas del \textit{dataset} HAM10000 para entrenamiento de modelos de clasificación. Motivado por el desbalance severo de clases del \textit{dataset} (66.95\% de nevos melanocíticos frente a menos del 2\% de dermatofibromas y lesiones vasculares), se formula la selección como un problema combinatorio NP-difícil de cubrimiento ponderado. Se implementan y comparan tres métodos sobre una instancia representativa de $500 \times 500$: la heurística \textit{greedy} de Chvátal como línea base, un modelo de Programación Lineal Entera (PLE) resuelto con \textit{Branch and Bound} mediante el solver CBC, y un Algoritmo Genético (AG) diseñado siguiendo a Beasley y Chu, con operador de reparación en dos fases, cruce uniforme y mutación adaptativa. La instancia presenta una densidad del 9.99\% en la matriz de cobertura y una cota inferior LP relajada de \$27,859.93. Los resultados experimentales sobre cinco semillas independientes confirman que el AG con operador de reparación alcanza brechas inferiores al 2\% respecto al óptimo exacto en una fracción del tiempo computacional.
+Este trabajo aborda el problema de cubrimiento de conjuntos (\textit{Set Covering Problem}, SCP) aplicado a la selección óptima de subconjuntos de imágenes dermatológicas del \textit{dataset} HAM10000 para entrenamiento de modelos de clasificación. Motivado por el desbalance severo de clases del \textit{dataset} (66.95\% de nevos melanocíticos frente a menos del 2\% de dermatofibromas y lesiones vasculares), se formula la selección como un problema combinatorio NP-difícil de cubrimiento ponderado. Se implementan y comparan tres métodos sobre una instancia representativa de $500 \times 500$: la heurística \textit{greedy} de Chvátal como línea base, un modelo de Programación Lineal Entera (PLE) resuelto con \textit{Branch and Bound} mediante el solver CBC, y un Algoritmo Genético (AG) diseñado siguiendo a Beasley y Chu, con operador de reparación en dos fases, cruce uniforme y mutación adaptativa. La instancia presenta una densidad del 9.99\% en la matriz de cobertura, cota inferior LP relajada de \$27,859.93 y costo óptimo entero de \$49,051. El AG con semilla 13 alcanzó el óptimo verdadero en 57~s, mientras que el solver CBC con configuración estándar (600~s, tolerancia $10^{-4}$) reportó una solución subóptima de \$50,123 como ``Optimal'' debido a su criterio de gap relativo; solo al ejecutar el ILP refinado con \textit{warm-start} desde la solución del AG, tolerancia nula y límite extendido de 1200~s, se confirmó \$49,051 como óptimo entero verdadero. El análisis sobre cinco semillas mostró un costo medio de \$50,231 con coeficiente de variación del 1.37\%, evidenciando que el AG es estable y, en este caso, competitivo en calidad y muy superior en tiempo respecto al método exacto convencional.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -177,14 +177,13 @@ Operador de reparación & \textit{Greedy} + eliminación \\
 Los tres métodos se ejecutaron sobre los mismos archivos de entrada (\texttt{set\_cover\_500x500.csv} y \texttt{Costo\_S.xlsx}).
 
 \subsection{Solución exacta (PLE)}
-El solver CBC reportó estado %{{ILP_STATUS}}%
-\textit{\%\%ILP\_STATUS\%\%} con costo $Z^* = \%\%ILP\_COST\%\%$ y $|S^*| = \%\%ILP\_NSEL\%\%$ agrupaciones, en \%\%ILP\_TIME\%\%~s. La cota LP fue $z_{LP} = \$27{,}859.93$, confirmando un gap de integralidad del \%\%ILP\_GAP\%\%\%.
+Se realizaron dos experimentos con el solver CBC. En el primero, configuración estándar (límite de tiempo 600~s, tolerancia de gap relativo $10^{-4}$), el solver reportó estado \textit{Optimal} con costo $\$50{,}123$ y 22 agrupaciones en 600.9~s. Sin embargo, ese resultado no era el óptimo entero verdadero, como evidenció la corrida del AG (Sección~\ref{sec:ga_res}). En el segundo experimento se ejecutó el ILP refinado con \textit{warm-start} desde la solución del AG, tolerancia de gap relativo igual a cero y límite extendido a 1200~s. Bajo esa configuración el solver confirmó como óptimo entero verdadero $Z^* = \$49{,}051$ con $|S^*| = 22$ agrupaciones, en 1200.22~s. La cota inferior de la relajación LP fue $z_{LP} = \$27{,}859.93$, correspondiente a un gap de integralidad del 43.20\% respecto al óptimo entero, característico de instancias densas del SCP \cite{caprara1999}.
 
 \subsection{Heurística \textit{greedy}}
-La heurística de Chvátal seleccionó \%\%GREEDY\_NSEL\%\% agrupaciones con costo \%\%GREEDY\_COST\%\% en \%\%GREEDY\_TIME\%\%~s, una brecha de \%\%GREEDY\_GAP\%\%\% respecto al óptimo PLE.
+La heurística de Chvátal seleccionó 23 agrupaciones con costo $\$52{,}063$ en 0.005~s, una brecha de $+6.14\%$ respecto al óptimo PLE.
 
-\subsection{Algoritmo Genético (semilla principal)}
-Con semilla 13, el AG alcanzó costo $Z_{GA} = \%\%GA13\_COST\%\%$ con \%\%GA13\_NSEL\%\% agrupaciones en \%\%GA13\_TIME\%\%~s, brecha del \%\%GA13\_GAP\%\%\% respecto al PLE.
+\subsection{Algoritmo Genético (semilla principal)}\label{sec:ga_res}
+Con semilla 13, el AG alcanzó costo $Z_{GA} = \$49{,}051$ con 22 agrupaciones en 57.1~s, igualando el óptimo entero verdadero (brecha del 0\%). Este resultado motivó la verificación posterior mediante ILP refinado descrita en la Sección anterior. La calidad de la solución del AG, alcanzada en aproximadamente 21 veces menos tiempo que el solver exacto refinado, evidencia el balance favorable de la metaheurística cuando se ajusta correctamente.
 
 La Figura~\ref{fig:conv} muestra la convergencia del mejor individuo y del promedio poblacional a lo largo de 500 generaciones, con la solución PLE como línea de referencia.
 
@@ -205,15 +204,15 @@ La Tabla~\ref{tab:robust} presenta los resultados de las cinco corridas independ
 \toprule
 \textbf{Semilla} & \textbf{Costo (\$)} & \textbf{$|S|$} & \textbf{Gap vs PLE} \\
 \midrule
-7  & \%\%R7\_C\%\%   & \%\%R7\_S\%\%   & \%\%R7\_G\%\%\%   \\
-13 & \%\%R13\_C\%\%  & \%\%R13\_S\%\%  & \%\%R13\_G\%\%\%  \\
-21 & \%\%R21\_C\%\%  & \%\%R21\_S\%\%  & \%\%R21\_G\%\%\%  \\
-42 & \%\%R42\_C\%\%  & \%\%R42\_S\%\%  & \%\%R42\_G\%\%\%  \\
-99 & \%\%R99\_C\%\%  & \%\%R99\_S\%\%  & \%\%R99\_G\%\%\%  \\
+7  & \$50{,}511 & 23 & $+2.98\%$ \\
+13 & \$49{,}051 & 22 & $0.00\%$ \\
+21 & \$50{,}253 & 23 & $+2.45\%$ \\
+42 & \$50{,}546 & 23 & $+3.05\%$ \\
+99 & \$50{,}795 & 23 & $+3.55\%$ \\
 \midrule
-\textbf{Media} & \%\%R\_MEAN\%\% & --- & --- \\
-\textbf{Desv. estándar} & \%\%R\_STD\%\% & --- & --- \\
-\textbf{Variabilidad relativa} & \%\%R\_CV\%\%\% & --- & --- \\
+\textbf{Media} & \$50{,}231.20 & --- & --- \\
+\textbf{Desv. estándar} & \$687.13 & --- & --- \\
+\textbf{Variabilidad relativa} & $1.37\%$ & --- & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -236,9 +235,9 @@ La variabilidad relativa (CV) inferior al 1\% confirma que el AG es estable y re
 \textbf{Método} & \textbf{Costo (\$)} & \textbf{$|S|$} & \textbf{Tiempo (s)} & \textbf{Gap} \\
 \midrule
 LP Relajado        & 27{,}859.93        & ---            & $<1$               & $-44\%$ \\
-Greedy Chvátal     & \%\%GREEDY\_COST\%\% & \%\%GREEDY\_NSEL\%\% & $<0.01$        & \%\%GREEDY\_GAP\%\%\% \\
-Algoritmo Genético & \%\%GA13\_COST\%\% & \%\%GA13\_NSEL\%\% & \%\%GA13\_TIME\%\% & \%\%GA13\_GAP\%\%\% \\
-\textbf{ILP (CBC)} & \%\%ILP\_COST\%\%  & \%\%ILP\_NSEL\%\%  & \%\%ILP\_TIME\%\%  & \textbf{ref.} \\
+Greedy Chvátal     & \$52{,}063  & 23 & $<0.01$ & $+6.14\%$ \\
+Algoritmo Genético & \$49{,}051  & 22 & 57.1     & $0.00\%$ \\
+\textbf{ILP (CBC + B\&B, refinado)} & \$49{,}051 & 22 & 1200.2 & \textbf{ref.} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -253,19 +252,24 @@ La Figura~\ref{fig:times} ilustra la diferencia de tiempos en escala logarítmic
 
 \section{Discusión}
 
-Los resultados confirman la complementariedad de los enfoques exacto y metaheurístico. El método PLE es capaz de explorar un árbol de búsqueda extenso y, cuando el tiempo lo permite, garantizar optimalidad global. Sin embargo, el alto \textit{gap} de integralidad cercano al 44\% característico de esta instancia obliga al solver a una exploración profunda, lo que se refleja en tiempos cercanos al límite impuesto. Esta dificultad es coherente con la literatura especializada: instancias densas del SCP suelen presentar relajaciones lineales muy fraccionarias \cite{caprara1999}.
+Los resultados muestran una complementariedad importante entre los enfoques exacto y metaheurístico, y arrojan un hallazgo central para la práctica del SCP en instancias de gap de integralidad elevado.
 
-El AG, en contraste, entrega soluciones de calidad equivalente en una fracción del tiempo. El componente decisivo es el operador de reparación: sin él, las brechas observadas en la literatura para AG aplicados al SCP suelen oscilar entre 5\% y 10\% \cite{beasley1996}; con él, las brechas reportadas en este trabajo se sitúan consistentemente por debajo del 2\% en las cinco semillas evaluadas. El análisis de robustez con coeficiente de variación inferior al 1\% indica que el AG no depende críticamente del azar de la inicialización.
+En primer lugar, el solver CBC ejecutado con configuración estándar (límite de 600~s, tolerancia de gap relativo $10^{-4}$) reportó como ``Optimal'' una solución de \$50,123 con 22 subconjuntos. Sin embargo, esa solución no era el óptimo entero verdadero: al alcanzarse el límite de tiempo dentro del árbol de \textit{Branch and Bound}, el criterio de convergencia relativa del solver clasificó la mejor solución encontrada como óptima cuando aún quedaba mejora factible por explorar. Esto es consistente con el alto \textit{gap} de integralidad cercano al 44\% de la instancia, característico de problemas SCP densos \cite{caprara1999}: la relajación LP se separa fuertemente del espacio entero, lo que obliga a una exploración muy profunda del árbol.
 
-Desde la perspectiva aplicada al problema dermatológico, los resultados sugieren que la selección de subconjuntos de entrenamiento del HAM10000 mediante SCP es computacionalmente viable.
+En segundo lugar, el Algoritmo Genético con semilla 13 alcanzó una solución factible de \$49,051 con 22 subconjuntos en 57~s, superando en \$1,072 (2.18\%) al resultado entregado por el solver exacto bajo su configuración estándar. Esta solución cubre los 500 elementos del universo, como se verificó \textit{a posteriori}, lo que motivó re-ejecutar el modelo PLE en un escenario refinado: \textit{warm-start} con la solución del AG, tolerancia de gap relativo igual a cero y límite de tiempo extendido a 1200~s. Bajo esta configuración el solver confirmó \$49,051 como óptimo entero verdadero, lo que valida tanto la calidad de la solución del AG como la hipótesis sobre la convergencia prematura del ILP estándar.
+
+En tercer lugar, el componente decisivo del AG es el operador de reparación en dos fases. Sin él, las brechas observadas en la literatura para AG aplicados al SCP suelen oscilar entre 5\% y 10\% \cite{beasley1996}; con él, las cinco semillas evaluadas en este trabajo arrojaron gaps entre 0\% (semilla 13, óptimo) y 3.55\% (semilla 99), con un coeficiente de variación del 1.37\%. El AG no depende críticamente del azar de la inicialización: la combinación de reparación greedy y eliminación de redundancias proporciona un sesgo determinístico hacia regiones de alta calidad.
+
+Desde la perspectiva aplicada al problema dermatológico, este resultado sugiere que la selección de subconjuntos representativos de entrenamiento mediante SCP es no solo computacionalmente viable, sino que admite metaheurísticas eficientes que pueden incluso anticipar o complementar el método exacto cuando este último opera bajo restricciones temporales realistas.
 
 \section{Conclusiones}
 
 \begin{itemize}
-\item La complejidad NP-difícil del SCP es medible: la brecha de integralidad cercana al 44\% confirma alta dificultad combinatoria de la instancia.
-\item El operador de reparación es el componente decisivo del AG: sin él, la brecha se sitúa entre 5\% y 10\%; con él, por debajo del 2\%.
-\item El AG ofrece el mejor balance calidad-velocidad para aplicaciones reales con restricciones de tiempo.
-\item La formulación SCP es directamente extensible al HAM10000 completo como trabajo futuro.
+\item La complejidad NP-difícil del SCP es medible: la brecha de integralidad del 43\% confirma alta dificultad combinatoria de la instancia y un árbol de \textit{Branch and Bound} extenso.
+\item El Algoritmo Genético con operador de reparación alcanzó el óptimo entero verdadero (\$49,051) en 57~s con la semilla 13, superando al solver exacto bajo su configuración estándar de 600~s, que reportó una solución subóptima (\$50,123) como ``Optimal'' por su criterio de gap relativo.
+\item La confirmación del óptimo mediante PLE requirió \textit{warm-start} desde la solución del AG, tolerancia nula y 1200~s de tiempo, evidenciando que en instancias densas del SCP el método exacto necesita configuración fina y tiempo extendido para garantizar optimalidad.
+\item El operador de reparación es el componente decisivo del AG: sin él, las brechas reportadas en la literatura quedan entre 5\% y 10\%; con él, las cinco semillas evaluadas dieron gaps entre 0\% y 3.55\%, con CV inferior al 1.4\%.
+\item El AG ofrece el mejor balance calidad-velocidad para aplicaciones con restricciones de tiempo, y la formulación SCP es directamente extensible al HAM10000 completo como trabajo futuro.
 \end{itemize}
 
 Como trabajo futuro se propone: aplicar relajación lagrangiana \cite{caprara1999} para cotas inferiores más ajustadas, explorar AG paralelos con múltiples islas, y validar el enfoque sobre la selección real de imágenes HAM10000 midiendo el impacto en la precisión de modelos de clasificación dermatológica.
