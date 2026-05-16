@@ -49,17 +49,30 @@ def fig_times():
     with open(RESULTS / "comparison.json") as f:
         comp = json.load(f)
     rows = [r for r in comp["comparison"] if r["time_s"] is not None]
-    names = [r["metodo"].replace(" (seed 13)", "").replace(" (CBC + B&B)", "") for r in rows]
+    names = [
+        r["metodo"]
+        .replace(" (seed 13)", "")
+        .replace(" (CBC + B&B)", " (refinado)")
+        for r in rows
+    ]
     times = [r["time_s"] for r in rows]
-    fig, ax = plt.subplots(figsize=(5.5, 3.2))
+    fig, ax = plt.subplots(figsize=(5.5, 3.4))
     bars = ax.bar(names, times, color=["#999999", "#ff7f0e", "#1f77b4"])
     ax.set_yscale("log")
+    ax.set_ylim(1e-3, max(times) * 4)
     ax.set_ylabel("Tiempo (s, escala log)")
     ax.set_title("Comparativa de tiempos de cómputo")
     for bar, t in zip(bars, times):
-        ax.text(bar.get_x() + bar.get_width() / 2, t, f"{t:.2f}s",
-                ha="center", va="bottom", fontsize=8)
+        if t < 0.1:
+            label = f"{t*1000:.1f} ms"
+        elif t < 100:
+            label = f"{t:.2f} s"
+        else:
+            label = f"{t:.1f} s"
+        ax.text(bar.get_x() + bar.get_width() / 2, t * 1.15, label,
+                ha="center", va="bottom", fontsize=9)
     ax.grid(alpha=0.3, axis="y", which="both")
+    fig.tight_layout()
     fig.savefig(FIGS / "fig_comparativa_tiempos.png")
     plt.close(fig)
 
