@@ -1,0 +1,5120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Set Cover · HAM10000 · Sustentación IO UNAB 2026-I</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<style>
+:root {
+  --ink: #2d1717;
+  --burgundy: #66121f;
+  --rose: #e15269;
+  --rose-pale: #f8e0e4;
+  --cream: #faf6f3;
+  --cream-warm: #f6efe9;
+  --paper: #fdfbf8;
+  --white: #ffffff;
+  --green: #4a7c59;
+  --ink-90: #2d1717e8;
+  --ink-60: #2d171799;
+  --ink-40: #2d171766;
+  --ink-20: #2d171733;
+  --ink-10: #2d17171a;
+  --ink-05: #2d17170d;
+  --burgundy-20: #66121f33;
+  --burgundy-10: #66121f1a;
+  --rose-20: #e1526933;
+
+  /* 8pt grid spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Type scale 1.250 (major third), base 17px */
+  --type-1: 17px;   /* base */
+  --type-2: 21px;
+  --type-3: 27px;
+  --type-4: 34px;
+  --type-5: 42px;
+  --type-6: 53px;
+  --type-7: 67px;
+  --type-8: 84px;
+  --type-9: 105px;
+
+  /* Premium easings */
+  --ease-apple: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-quart: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Multi-layer tinted shadows (burgundy) */
+  --shadow-sm: 0 1px 2px rgba(102, 18, 31, 0.04), 0 2px 6px rgba(102, 18, 31, 0.05);
+  --shadow-md: 0 1px 2px rgba(102, 18, 31, 0.04), 0 4px 12px rgba(102, 18, 31, 0.06), 0 16px 32px rgba(102, 18, 31, 0.08);
+  --shadow-lg: 0 2px 4px rgba(102, 18, 31, 0.05), 0 8px 20px rgba(102, 18, 31, 0.08), 0 24px 48px rgba(102, 18, 31, 0.10);
+
+  --serif: "Times New Roman", "Cormorant Garamond", "PT Serif", Georgia, serif;
+  --mono: "Courier New", "Courier", monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+html, body {
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-feature-settings: "kern", "liga", "calt", "onum";
+}
+
+body { font-size: var(--type-1); line-height: 1.4; }
+
+/* Film grain */
+.grain {
+  position: fixed; inset: 0; z-index: 50;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+/* Stage */
+.stage {
+  position: relative; z-index: 10;
+  width: 100vw; height: 100dvh;
+  display: flex;
+  background: var(--cream);
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--cream);
+}
+.slide.active { display: flex; }
+
+/* Top chrome */
+.chrome-top {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 90;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: var(--space-4) var(--space-6);
+  font-family: var(--serif);
+  font-size: clamp(10.5px, 0.72vw, 11px); letter-spacing: 0.26em; text-transform: uppercase;
+  color: var(--ink-60);
+  pointer-events: none;
+}
+.chrome-top strong { color: var(--burgundy); font-weight: 700; }
+.chrome-top .right { pointer-events: auto; }
+.chrome-top .right a {
+  font-family: var(--mono);
+  letter-spacing: 0.02em; text-transform: lowercase;
+  color: var(--burgundy);
+  text-decoration: none;
+  font-size: 12px;
+  border-bottom: 1px solid var(--burgundy-20);
+  padding-bottom: 1px;
+}
+.chrome-top .right a:hover { border-bottom-color: var(--burgundy); }
+
+/* Slide common */
+.slide-inner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: var(--space-7) var(--space-8) calc(var(--space-8) + var(--space-1));
+  gap: var(--space-5);
+}
+@media (max-width: 1400px) {
+  .slide-inner { padding: var(--space-6) var(--space-7) var(--space-7); gap: var(--space-4); }
+}
+
+.s-header {
+  flex-shrink: 0;
+  display: flex; flex-direction: column;
+  gap: var(--space-2);
+}
+.s-header .lede { margin-top: var(--space-1); font-size: clamp(14.5px, 1.05vw, var(--type-1)); line-height: 1.4; }
+
+.s-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: var(--space-4);
+  justify-content: space-between;
+}
+.s-body > * { flex-shrink: 0; }
+.s-body > .grid-asym,
+.s-body > .grid-asym-rev,
+.s-body > .grid-2,
+.s-body > .grid-3,
+.s-body > .stretch { flex: 1 1 auto; min-height: 0; }
+
+/* Typography */
+.kicker {
+  font-family: var(--serif);
+  font-size: clamp(11px, 0.78vw, 12px);
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--burgundy);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.kicker::before {
+  content: '';
+  width: var(--space-7); height: 1px;
+  background: var(--burgundy);
+}
+
+.title {
+  font-family: var(--serif);
+  font-weight: 400;
+  letter-spacing: -0.028em;
+  line-height: 1.1;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.title em { font-style: italic; color: var(--burgundy); }
+
+.title-xl { font-size: clamp(var(--type-7), 7.5vw, var(--type-9)); line-height: 1.05; }
+.title-lg { font-size: clamp(var(--type-5), 4.6vw, var(--type-8)); line-height: 1.1; }
+.title-md { font-size: clamp(var(--type-4), 3.6vw, var(--type-6)); line-height: 1.15; }
+
+.lede {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(var(--type-1), 1.25vw, var(--type-2));
+  color: var(--ink-60);
+  line-height: 1.4;
+  max-width: 72ch;
+  text-wrap: pretty;
+}
+
+h3.label {
+  font-family: var(--serif);
+  font-size: clamp(10.5px, 0.7vw, 11px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.26em;
+  color: var(--burgundy);
+  padding-bottom: var(--space-2);
+  margin-bottom: var(--space-4);
+  border-bottom: 0.5px solid var(--ink-10);
+}
+
+/* Editorial list */
+ul.editorial { list-style: none; padding: 0; }
+ul.editorial li {
+  padding: var(--space-2) 0 var(--space-2) var(--space-6);
+  position: relative;
+  font-size: clamp(15px, 1vw, 15.5px);
+  line-height: 1.4;
+  color: var(--ink-90);
+  border-bottom: 0.5px solid var(--ink-10);
+  text-wrap: pretty;
+}
+ul.editorial li:last-child { border-bottom: 1px solid var(--ink); }
+ul.editorial li:first-child { border-top: 1px solid var(--ink); }
+ul.editorial li::before {
+  content: counter(li, upper-roman);
+  counter-increment: li;
+  position: absolute; left: 0; top: 8px;
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--burgundy);
+  font-size: 16px;
+  font-weight: 400;
+  width: 30px;
+}
+ul.editorial { counter-reset: li; }
+ul.editorial li strong { color: var(--ink); font-weight: 700; }
+ul.editorial li em { color: var(--burgundy); font-style: italic; }
+
+/* Mono inline */
+code, .mono {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  color: var(--burgundy);
+  background: var(--rose-pale);
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.num, .value, td, th, .metric, .metric .value {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tables editorial */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: clamp(14.5px, 1vw, 15.5px);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+thead th {
+  font-family: var(--serif);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: clamp(10.5px, 0.7vw, 11px);
+  letter-spacing: 0.24em;
+  color: var(--burgundy);
+  padding: var(--space-3) var(--space-3);
+  border-bottom: 1.5px solid var(--ink);
+  text-align: left;
+}
+tbody td {
+  padding: var(--space-3) var(--space-3);
+  border-bottom: 0.5px solid var(--ink-10);
+  color: var(--ink-90);
+}
+tbody tr:last-child td { border-bottom: 1.5px solid var(--ink); }
+tbody tr.highlight td { background: var(--rose-pale); color: var(--burgundy); font-weight: 700; }
+tbody tr.optimo td { background: #4a7c5912; }
+tbody tr.optimo td:first-child { color: var(--green); font-weight: 700; }
+tbody tr.warning td { background: #e1526912; }
+tbody tr.warning td:first-child { color: var(--rose); font-style: italic; }
+td strong { color: var(--ink); }
+td em { color: var(--rose); font-style: italic; }
+
+/* Layout grids */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); align-items: stretch; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); align-items: stretch; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3); align-items: stretch; }
+.grid-asym { display: grid; grid-template-columns: 1.35fr 1fr; gap: var(--space-6); align-items: stretch; }
+.grid-asym-rev { display: grid; grid-template-columns: 1fr 1.35fr; gap: var(--space-6); align-items: stretch; }
+
+.col { display: flex; flex-direction: column; gap: var(--space-4); min-height: 0; }
+.col.scroll { overflow: hidden; }
+.col > .chart-wrap { flex: 1 1 auto; min-height: 0; }
+
+/* Metric — editorial number card */
+.metric {
+  position: relative;
+  padding: var(--space-4) var(--space-4) var(--space-4);
+  background: var(--white);
+  border: 0.5px solid var(--ink-10);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  box-shadow: var(--shadow-sm);
+  transition-property: transform, box-shadow, border-color;
+  transition-duration: 420ms;
+  transition-timing-function: var(--ease-expo);
+}
+.metric:hover {
+  transform: translateY(-2px);
+  border-color: var(--burgundy);
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+.metric .label {
+  font-family: var(--serif);
+  font-size: clamp(10px, 0.7vw, 10.5px);
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--burgundy);
+  margin-bottom: var(--space-1);
+  font-weight: 700;
+}
+.metric .value {
+  font-family: var(--serif);
+  font-size: clamp(27px, 2.4vw, var(--type-4));
+  font-weight: 400;
+  letter-spacing: -0.028em;
+  color: var(--ink);
+  line-height: 1.1;
+  margin-bottom: var(--space-1);
+}
+.metric .delta {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(12px, 0.85vw, 12.5px);
+  color: var(--ink-60);
+  line-height: 1.4;
+}
+.metric .delta.good { color: var(--green); }
+.metric .delta.bad { color: var(--rose); }
+
+.metric.dark {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.metric.dark .label { color: var(--rose); }
+.metric.dark .value { color: var(--cream); }
+.metric.dark .delta { color: var(--rose-pale); }
+
+.metric.burgundy {
+  background: var(--burgundy);
+  border-color: var(--burgundy);
+}
+.metric.burgundy .label { color: var(--rose-pale); }
+.metric.burgundy .value { color: var(--white); }
+.metric.burgundy .delta { color: var(--rose-pale); }
+
+.metric.warn { background: var(--rose-pale); border-color: var(--rose-pale); }
+.metric.warn .label { color: var(--burgundy); }
+.metric.warn .value { color: var(--burgundy); }
+.metric.warn .delta { color: var(--burgundy); }
+
+.metric.good { background: #4a7c5910; border-color: #4a7c5933; }
+.metric.good .label { color: var(--green); }
+.metric.good .value { color: var(--green); }
+.metric.good .delta { color: var(--green); }
+
+/* Callout */
+.callout {
+  padding: var(--space-4) var(--space-5) var(--space-4) var(--space-5);
+  background: var(--cream-warm);
+  border-left: 3px solid var(--burgundy);
+  font-size: clamp(15.5px, 1.1vw, 16.5px);
+  line-height: 1.5;
+  color: var(--ink-90);
+  font-style: italic;
+  box-shadow: var(--shadow-sm);
+}
+.callout strong { color: var(--burgundy); font-weight: 700; font-style: normal; }
+.callout.rose { background: var(--rose-pale); border-left-color: var(--rose); }
+.callout.rose strong { color: var(--rose); }
+.callout.green { background: #4a7c5910; border-left-color: var(--green); }
+.callout.green strong { color: var(--green); }
+.callout.dark { background: var(--ink); border-left-color: var(--rose); color: var(--cream); }
+.callout.dark strong { color: var(--rose); }
+
+/* Formula */
+.formula {
+  padding: var(--space-5) var(--space-6);
+  background: var(--paper);
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  text-align: center;
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+.formula .label {
+  font-family: var(--serif);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--burgundy);
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+.formula .katex { font-size: 1.2em !important; color: var(--ink); }
+
+.formula.hero {
+  background: var(--ink);
+  border-color: var(--ink);
+  padding: var(--space-6) var(--space-7);
+  box-shadow: var(--shadow-lg);
+}
+.formula.hero .label { color: var(--rose); }
+.formula.hero .katex { color: var(--cream); font-size: 1.45em !important; }
+
+.formula.compact {
+  padding: 14px 22px;
+}
+.formula.compact .label { margin-bottom: 8px; font-size: 10px; }
+.formula.compact .katex { font-size: 1.05em !important; }
+
+/* Code blocks */
+pre.code {
+  font-family: var(--mono);
+  background: var(--ink);
+  color: var(--paper);
+  padding: 18px 22px;
+  border-radius: 3px;
+  font-size: 13.5px;
+  line-height: 1.7;
+  overflow: auto;
+  letter-spacing: 0.01em;
+  white-space: pre;
+  display: block;
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 100%;
+}
+pre.code .kw { color: var(--rose); }
+pre.code .v { color: #ffcbb0; }
+pre.code .comment { color: #c4a4a4; font-style: italic; }
+
+/* Definitions */
+.defs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1) var(--space-5);
+  font-size: clamp(15px, 1.05vw, 16px);
+  line-height: 1.5;
+  color: var(--ink-90);
+}
+.defs > div { padding: var(--space-2) 0; border-bottom: 0.5px solid var(--ink-05); }
+.defs em { color: var(--burgundy); font-style: italic; }
+
+/* Chart wrap */
+.chart-wrap {
+  position: relative;
+  background: var(--white);
+  border: 0.5px solid var(--ink-10);
+  border-radius: 4px;
+  padding: var(--space-3) var(--space-4);
+  flex: 1 1 auto;
+  min-height: 340px;
+  max-height: 100%;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.chart-wrap canvas {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ─── SLIDE 1 · COVER ──────────────────────────── */
+.cover .slide-inner {
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 0;
+}
+.cover .left {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 64px 64px 64px 68px;
+  display: flex; flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+.cover .left::after {
+  content: '';
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--rose) 20%, var(--rose) 80%, transparent);
+}
+.cover .left .kicker { color: var(--rose); }
+.cover .left .kicker::before { background: var(--rose); }
+.cover .left h1 {
+  font-family: var(--serif);
+  font-size: clamp(88px, 9.4vw, 156px);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 0.86;
+  color: var(--cream);
+}
+.cover .left h1 em {
+  font-style: italic;
+  color: var(--rose);
+  display: block;
+}
+.cover .left .subline {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--rose-pale);
+  font-size: clamp(19px, 1.4vw, 24px);
+  margin-top: 36px;
+  line-height: 1.4;
+  max-width: 24ch;
+}
+.cover .left .subline .ds {
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.92em;
+  color: var(--rose);
+}
+.cover .left .footer-meta {
+  font-family: var(--serif);
+  font-size: 15px;
+  color: var(--rose-pale);
+  letter-spacing: 0.04em;
+  font-style: italic;
+  line-height: 1.7;
+}
+.cover .left .footer-meta strong {
+  color: var(--cream); font-style: normal; font-weight: 700;
+  letter-spacing: 0.2em; text-transform: uppercase; font-size: 12px;
+  display: block; margin-bottom: 4px;
+}
+
+.cover .right {
+  background: var(--cream);
+  padding: 64px 68px 64px 68px;
+  display: flex; flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+.cover .right .subtitle {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(22px, 1.7vw, 28px);
+  color: var(--ink);
+  line-height: 1.34;
+  text-wrap: pretty;
+  max-width: 27ch;
+  margin-top: 28px;
+}
+.cover .right .subtitle .sc {
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--burgundy);
+  font-size: 0.78em;
+  font-weight: 700;
+}
+.cover .right .authors {
+  display: flex; flex-direction: column;
+  gap: 0;
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  padding: 28px 0;
+}
+.cover .right .authors .author {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 12px 0;
+}
+.cover .right .authors .role {
+  font-size: 11.5px; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--burgundy); font-weight: 700;
+}
+.cover .right .authors .name {
+  font-size: clamp(22px, 1.7vw, 28px); font-style: italic; color: var(--ink);
+}
+.cover .right .session {
+  font-family: var(--serif);
+  font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--ink-60); font-weight: 700;
+  margin-top: 26px;
+}
+.cover .right .session strong { color: var(--burgundy); }
+
+/* ─── DARK / BURGUNDY THEMES ──────────────────────────── */
+.slide.dark-slide { background: var(--ink); }
+.slide.dark-slide .kicker { color: var(--rose); }
+.slide.dark-slide .kicker::before { background: var(--rose); }
+.slide.dark-slide .title { color: var(--cream); }
+.slide.dark-slide .title em { color: var(--rose); }
+.slide.dark-slide .lede { color: var(--rose-pale); }
+.slide.dark-slide ul.editorial li { color: var(--cream); border-bottom-color: #ffffff20; }
+.slide.dark-slide ul.editorial li:first-child { border-top: 1px solid var(--cream); }
+.slide.dark-slide ul.editorial li:last-child { border-bottom: 1px solid var(--cream); }
+.slide.dark-slide ul.editorial li strong { color: var(--white); }
+.slide.dark-slide ul.editorial li em { color: var(--rose-pale); font-style: italic; }
+.slide.dark-slide ul.editorial li::before { color: var(--rose); }
+.slide.dark-slide code { background: #ffffff20; color: var(--rose-pale); }
+.slide.dark-slide h3.label { color: var(--rose-pale); border-bottom-color: #ffffff25; }
+
+.slide.burgundy-slide { background: var(--burgundy); }
+.slide.burgundy-slide .kicker { color: var(--rose-pale); }
+.slide.burgundy-slide .kicker::before { background: var(--rose-pale); }
+.slide.burgundy-slide .title { color: var(--cream); }
+.slide.burgundy-slide .title em { color: var(--rose-pale); font-style: italic; }
+.slide.burgundy-slide ul.editorial li {
+  color: var(--cream);
+  border-bottom-color: #ffffff25;
+}
+.slide.burgundy-slide ul.editorial li:first-child { border-top: 1px solid #ffffff; }
+.slide.burgundy-slide ul.editorial li:last-child { border-bottom: 1px solid #ffffff; }
+.slide.burgundy-slide ul.editorial li strong { color: var(--white); }
+.slide.burgundy-slide ul.editorial li em { color: var(--rose-pale); }
+.slide.burgundy-slide ul.editorial li::before { color: var(--rose-pale); }
+.slide.burgundy-slide .callout { background: #ffffff14; border-left-color: var(--rose-pale); color: var(--cream); }
+.slide.burgundy-slide .callout strong { color: var(--rose-pale); }
+.slide.burgundy-slide h3.label { color: var(--rose-pale); border-bottom-color: #ffffff25; }
+.slide.burgundy-slide .lede { color: var(--rose-pale); }
+.slide.dark-slide .lede { color: var(--rose-pale); }
+
+/* Phase cards */
+.phase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.phase-card {
+  display: flex; gap: 20px;
+  padding: 20px 24px;
+  background: var(--white);
+  border: 1px solid var(--ink-10);
+  border-radius: 4px;
+  align-items: flex-start;
+}
+.phase-card-dark { background: var(--ink); border-color: var(--ink); color: var(--cream); }
+.phase-num {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 58px;
+  line-height: 0.85;
+  color: var(--burgundy);
+  flex-shrink: 0;
+  letter-spacing: -0.04em;
+}
+.phase-card-dark .phase-num { color: var(--rose); }
+.phase-content { flex: 1; min-width: 0; }
+.phase-title {
+  font-family: var(--serif);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--burgundy);
+  margin-bottom: 10px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--ink-10);
+}
+.phase-card-dark .phase-title { color: var(--rose-pale); border-bottom-color: #ffffff25; }
+.phase-steps {
+  list-style: decimal;
+  padding-left: 18px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-90);
+}
+.phase-card-dark .phase-steps { color: var(--cream); }
+.phase-steps li { padding: 2px 0; }
+.phase-steps li::marker {
+  color: var(--burgundy);
+  font-style: italic;
+  font-family: var(--serif);
+}
+.phase-card-dark .phase-steps li::marker { color: var(--rose-pale); }
+
+/* Annotation marginalia */
+.annotation {
+  position: relative;
+  padding-left: var(--space-5);
+  border-left: 2px solid var(--rose);
+  font-style: italic;
+  color: var(--ink-60);
+  font-size: clamp(15px, 1.05vw, 15.5px);
+  line-height: 1.5;
+}
+.annotation::before {
+  content: '"';
+  position: absolute;
+  left: -16px; top: -18px;
+  font-size: 68px;
+  color: var(--rose-20);
+  font-family: var(--serif);
+}
+
+/* Quote / key statement (replaces side-stripe callouts when we want emphasis) */
+.statement {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(22px, 2.1vw, 32px);
+  line-height: 1.32;
+  color: var(--ink);
+  max-width: 30ch;
+  text-wrap: balance;
+  position: relative;
+  padding: 14px 0;
+}
+.statement strong { font-style: normal; color: var(--burgundy); font-weight: 700; }
+.dark-slide .statement { color: var(--cream); }
+.dark-slide .statement strong { color: var(--rose); }
+
+/* ─── NAV ──────────────────────────── */
+.nav {
+  position: fixed; bottom: var(--space-5); left: 50%; transform: translateX(-50%);
+  z-index: 100;
+  display: flex; align-items: center; gap: var(--space-3);
+  background: var(--white);
+  border: 0.5px solid var(--ink-20);
+  padding: 5px 5px 5px var(--space-4);
+  border-radius: 100px;
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.7);
+  font-family: var(--serif);
+}
+.nav button {
+  background: transparent;
+  border: 0.5px solid var(--ink-20);
+  color: var(--ink);
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: var(--serif);
+  transition-property: background-color, color, transform, border-color;
+  transition-duration: 320ms;
+  transition-timing-function: var(--ease-quart);
+  display: flex; align-items: center; justify-content: center;
+}
+.nav button:hover { background: var(--burgundy); color: var(--cream); border-color: var(--burgundy); }
+.nav button:active { transform: scale(0.94); }
+.nav .counter {
+  font-family: var(--serif);
+  font-size: 13px; color: var(--ink-60);
+  font-variant-numeric: tabular-nums;
+  font-style: italic;
+}
+.nav .counter .current { color: var(--burgundy); font-weight: 700; font-style: normal; font-size: 14px; }
+
+/* Dots */
+.dots {
+  position: fixed; top: 50%; right: 22px; transform: translateY(-50%);
+  z-index: 100;
+  display: flex; flex-direction: column; gap: 8px;
+  mix-blend-mode: difference;
+}
+.dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #888888;
+  cursor: pointer; border: none; padding: 0;
+  transition-property: background-color, transform;
+  transition-duration: 320ms;
+  transition-timing-function: var(--ease-expo);
+}
+.dot:hover { background: #ffffff; }
+.dot.active { background: #e15269; transform: scale(1.7); }
+
+/* Progress */
+.progress {
+  position: fixed; top: 0; left: 0;
+  height: 2px;
+  background: var(--burgundy);
+  z-index: 100;
+  transition: width 720ms var(--ease-expo);
+}
+
+/* Speaker notes */
+.notes {
+  display: none;
+  position: fixed; bottom: 78px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 110;
+  max-width: 720px;
+  padding: 16px 22px;
+  background: var(--ink);
+  color: var(--cream-warm);
+  border-radius: 4px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  font-style: italic;
+  font-family: var(--serif);
+  box-shadow: 0 20px 50px -20px var(--ink);
+}
+.notes-label {
+  display: block;
+  font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--rose); margin-bottom: 6px; font-style: normal; font-weight: 700;
+}
+body.show-notes .slide.active .notes { display: block; }
+
+.toggle-notes {
+  position: fixed; bottom: 22px; right: 22px;
+  z-index: 100;
+  padding: 8px 14px;
+  background: var(--white);
+  border: 1px solid var(--ink-20);
+  border-radius: 100px;
+  font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-60); cursor: pointer;
+  font-family: var(--serif); font-weight: 700;
+  transition-property: color, border-color;
+  transition-duration: 220ms;
+}
+.toggle-notes:hover { color: var(--burgundy); border-color: var(--burgundy); }
+.toggle-notes { transition-timing-function: var(--ease-quart); }
+
+/* ─── FIX-PASS · CLASES SEMÁNTICAS SWARM B ──────────────── */
+
+/* Slide 1 · Cover — wrappers semánticos */
+.cover-title-block {
+  margin-top: var(--space-7);
+}
+.cover-lede {
+  font-family: var(--serif);
+  font-size: clamp(18px, 1.6vw, 22px);
+  font-style: italic;
+  color: var(--ink-60);
+  line-height: 1.5;
+}
+.cover-authors {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  padding: var(--space-5) 0;
+}
+.cover-authors .author {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: var(--space-3) 0;
+}
+.cover-authors .role {
+  font-family: var(--serif);
+  font-size: 11.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--burgundy);
+  font-weight: 700;
+}
+.cover-authors .name {
+  font-family: var(--serif);
+  font-size: clamp(22px, 1.7vw, 28px);
+  font-style: italic;
+  color: var(--ink);
+}
+
+/* Métricas · variantes inline para values */
+.value-unit {
+  font-size: 0.55em;
+  font-weight: 400;
+  color: var(--ink-60);
+  margin-left: 2px;
+}
+.value-italic {
+  font-style: italic;
+  font-size: 22px;
+}
+
+/* Métricas · variante compacta */
+.metric-mini {
+  padding: var(--space-3) var(--space-4);
+}
+.metric-mini .value {
+  font-size: 22px;
+}
+.metric-mini-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+/* Definitions · variantes layout */
+.defs-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.defs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1) var(--space-5);
+  font-size: clamp(15px, 1.05vw, 16px);
+  line-height: 1.5;
+  color: var(--ink-90);
+}
+.defs-grid > div {
+  padding: var(--space-2) 0;
+  border-bottom: 0.5px solid var(--ink-05);
+}
+.defs-grid em {
+  color: var(--burgundy);
+  font-style: italic;
+}
+.defs-stack {
+  grid-template-columns: 1fr;
+}
+
+/* Chart · variante mutación adaptativa (más compacta) */
+.chart-wrap-mut {
+  min-height: 140px;
+  max-height: 180px;
+}
+
+/* Slide 5 · tabla específica operador reparación */
+.gap-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: clamp(13.5px, 0.95vw, 15px);
+  line-height: 1.45;
+  color: var(--ink-90);
+  background: var(--white);
+  border: 0.5px solid var(--ink-10);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.gap-table th,
+.gap-table td {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  border-bottom: 0.5px solid var(--ink-10);
+  vertical-align: top;
+}
+.gap-table th {
+  font-family: var(--serif);
+  font-size: 10.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--burgundy);
+  font-weight: 700;
+  background: var(--cream-warm);
+  border-bottom: 1px solid var(--ink);
+}
+.gap-table tr:last-child td {
+  border-bottom: none;
+}
+.gap-table em {
+  color: var(--burgundy);
+  font-style: italic;
+}
+.gap-table strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* ============================================================
+   SWARM D2 · Micro-interactions hover/click (overrides finales)
+   ============================================================ */
+
+/* 1. Metric cards — refined hover with scale + softer shadow */
+.metric {
+  cursor: default;
+  transition: transform 360ms var(--ease-expo), border-color 360ms var(--ease-expo), box-shadow 480ms var(--ease-expo);
+}
+.metric:hover {
+  transform: translateY(-3px) scale(1.005);
+  border-color: var(--burgundy);
+  box-shadow: 0 12px 32px -8px rgba(102, 18, 31, 0.18);
+}
+.metric:hover .value {
+  color: var(--burgundy);
+  transition: color 280ms var(--ease-expo);
+}
+.metric:active {
+  transform: translateY(-1px) scale(0.998);
+  transition-duration: 120ms;
+}
+.metric.burgundy:hover,
+.metric.dark:hover {
+  border-color: var(--rose);
+  transform: translateY(-3px) scale(1.005);
+}
+.metric.burgundy:hover .value,
+.metric.dark:hover .value {
+  color: var(--cream);
+}
+
+/* 2. Callouts — hover expand subtle */
+.callout {
+  transition: padding 300ms var(--ease-expo), background-color 300ms var(--ease-expo);
+}
+.callout:hover {
+  padding-left: calc(var(--space-6) + 4px);
+  background-color: rgba(102, 18, 31, 0.04);
+}
+.callout.green:hover { background-color: rgba(74, 124, 89, 0.08); }
+.callout.rose:hover { background-color: rgba(225, 82, 105, 0.06); }
+.callout.dark:hover { background-color: rgba(255, 255, 255, 0.04); }
+
+/* 3. Table row emphasis */
+tbody tr {
+  transition: background-color 220ms var(--ease-expo);
+}
+tbody tr:hover {
+  background-color: rgba(102, 18, 31, 0.04);
+}
+tbody tr.optimo:hover {
+  background-color: rgba(74, 124, 89, 0.08);
+}
+tbody tr.warning:hover {
+  background-color: rgba(225, 82, 105, 0.06);
+}
+
+/* 4. Dots magnetic feedback */
+.dot {
+  transition: transform 360ms var(--ease-expo), background-color 240ms var(--ease-expo);
+  cursor: pointer;
+}
+.dot:hover {
+  transform: scale(1.5);
+  background-color: var(--rose);
+}
+.dot.active {
+  background-color: var(--burgundy);
+  transform: scale(1.8);
+}
+
+/* 5. Nav button refined */
+.nav button {
+  position: relative;
+  overflow: hidden;
+  transition: transform 280ms var(--ease-expo), background-color 280ms var(--ease-expo), color 280ms var(--ease-expo), border-color 280ms var(--ease-expo);
+}
+.nav button:hover {
+  transform: scale(1.08);
+  background-color: var(--burgundy);
+  color: var(--cream);
+  border-color: var(--burgundy);
+}
+.nav button:active { transform: scale(0.94); }
+.nav button:focus-visible {
+  outline: 2px solid var(--burgundy);
+  outline-offset: 2px;
+}
+
+/* 6. Toggle notes premium */
+.toggle-notes {
+  transition: background-color 300ms var(--ease-expo), color 300ms var(--ease-expo), border-color 300ms var(--ease-expo), transform 300ms var(--ease-expo);
+}
+.toggle-notes:hover {
+  background-color: var(--burgundy);
+  color: var(--cream);
+  border-color: var(--burgundy);
+}
+.toggle-notes:focus-visible {
+  outline: 2px solid var(--burgundy);
+  outline-offset: 2px;
+}
+
+/* 7. Decorative pulse on featured metric values */
+@keyframes pulse-subtle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.015); }
+}
+.metric.burgundy .value,
+.metric.feature .value {
+  animation: pulse-subtle 4s ease-in-out infinite;
+  transform-origin: left center;
+}
+
+/* 8. Code blocks hover */
+pre.code {
+  transition: border-color 280ms var(--ease-expo), box-shadow 280ms var(--ease-expo);
+}
+pre.code:hover {
+  border-color: var(--rose);
+  box-shadow: 0 0 0 1px var(--rose-20);
+}
+
+/* ─── Char-by-char title reveal (Swarm C2) ─── */
+.title-xl .char,
+.title-lg .char,
+.title .char,
+.cover .left h1 .char {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: baseline;
+  will-change: transform;
+}
+.em-wrap {
+  font-style: italic;
+}
+
+/* ─── Keyboard hint toast (Swarm C2) ─── */
+.kb-hint {
+  position: fixed;
+  bottom: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 95;
+  font-family: var(--serif, "Times New Roman", serif);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink-60, #2d171799);
+  background: var(--white, #ffffff);
+  border: 1px solid var(--ink-10, #2d17171a);
+  border-radius: 100px;
+  padding: 8px 18px;
+  box-shadow: 0 8px 24px -8px rgba(102, 18, 31, 0.15);
+  pointer-events: none;
+  letter-spacing: 0.05em;
+}
+.kb-hint strong {
+  color: var(--burgundy, #66121f);
+  font-weight: 700;
+  font-style: normal;
+  background: var(--rose-pale, #f8e0e4);
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin: 0 2px;
+}
+
+/* ─── Slide 3 · Árbol B&B SVG ─── */
+.bb-tree {
+  margin-top: var(--space-4, 16px);
+  padding-top: var(--space-3, 12px);
+  border-top: 0.5px solid var(--ink-10, #2d17171a);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
+}
+.bb-tree-label {
+  font-family: var(--serif, "Times New Roman", serif);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--burgundy, #66121f);
+  font-weight: 700;
+}
+.bb-svg {
+  width: 100%;
+  max-height: 130px;
+  height: auto;
+  display: block;
+}
+.bb-legend {
+  display: flex;
+  gap: var(--space-3, 12px);
+  flex-wrap: wrap;
+  font-family: var(--serif, "Times New Roman", serif);
+  font-style: italic;
+  font-size: 12px;
+  color: var(--ink-60, #2d171799);
+}
+.bb-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.bb-legend .dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* ─── Slide 4 · Layout AG reorganizado ─── */
+.ag-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+  flex: 1;
+  min-height: 0;
+}
+.ag-row-top {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: var(--space-4, 16px);
+  align-items: start;
+}
+.ag-fitness-banner {
+  width: 100%;
+  text-align: center;
+  padding: var(--space-3, 12px) var(--space-5, 24px);
+}
+.ag-fitness-banner .katex {
+  font-size: 1.05em !important;
+}
+.ag-chart-full {
+  width: 100%;
+  min-height: 220px;
+  flex: 1;
+}
+
+/* ════════════════════════════════════════════════════════
+   SLIDE 2 · NP-difícil · layout reorganizado 2x2
+═════════════════════════════════════════════════════════ */
+.s2-body {
+  gap: var(--space-4);
+}
+.s2-row-top {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: var(--space-5);
+  align-items: stretch;
+  flex: 0 0 auto;
+}
+.s2-metric-grid {
+  gap: var(--space-3);
+}
+.s2-hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-4) var(--space-5);
+}
+.s2-hero .katex-display {
+  margin: 6px 0 !important;
+}
+.s2-hero .katex {
+  font-size: 1.15em !important;
+  color: var(--cream);
+}
+.s2-row-bottom {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: var(--space-5);
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.s2-defs-col,
+.s2-stats-col {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.s2-defs > div {
+  padding: var(--space-1) 0;
+  border-bottom: 0.5px solid var(--ink-05);
+  font-size: clamp(14px, 0.98vw, 15.5px);
+  line-height: 1.45;
+}
+.s2-defs > div:last-child {
+  border-bottom: none;
+}
+.s2-stats-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.s2-stats-stack .metric-mini {
+  padding: var(--space-2) var(--space-3);
+}
+.s2-context-line {
+  font-family: var(--serif);
+  font-size: clamp(13px, 0.95vw, 14.5px);
+  color: var(--ink-60);
+  padding: var(--space-2) var(--space-3);
+  border-left: 2px solid var(--burgundy);
+  background: var(--cream-warm);
+  border-radius: 2px;
+  font-style: normal;
+  line-height: 1.4;
+}
+.s2-context-line em {
+  color: var(--burgundy);
+  font-style: italic;
+}
+
+/* ════════════════════════════════════════════════════════
+   SLIDE 3 · B&B · árbol protagonista 60/40
+═════════════════════════════════════════════════════════ */
+.s3-body {
+  gap: var(--space-4);
+}
+.s3-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: var(--space-5);
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: stretch;
+}
+.s3-tree-col,
+.s3-data-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 0;
+}
+.s3-tree-wrap {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3);
+  background: var(--cream-warm);
+  border: 0.5px solid var(--ink-10);
+  border-radius: 4px;
+  min-height: 0;
+}
+.s3-svg {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 380px;
+  aspect-ratio: 420 / 300;
+  display: block;
+}
+.s3-legend {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 12.5px;
+  color: var(--ink-60);
+  padding-top: var(--space-1);
+}
+.s3-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.s3-legend .dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.s3-callout {
+  margin: var(--space-1) 0 0;
+  font-size: clamp(12.5px, 0.92vw, 14px);
+  line-height: 1.5;
+  padding: var(--space-3) var(--space-4);
+}
+.s3-mini-list {
+  font-size: clamp(12.5px, 0.9vw, 13.5px);
+  margin-top: var(--space-1);
+}
+.s3-mini-list li {
+  padding: var(--space-2) 0 var(--space-2) var(--space-5);
+}
+
+/* ════════════════════════════════════════════════════════
+   SLIDE 4 · AG · chart protagonista full-width abajo
+═════════════════════════════════════════════════════════ */
+.s4-body {
+  gap: var(--space-4);
+}
+.s4-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.s4-row-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+  flex: 0 0 auto;
+  align-items: stretch;
+}
+.s4-col {
+  gap: var(--space-2);
+}
+.s4-table {
+  font-size: clamp(13px, 0.92vw, 14.5px);
+}
+.s4-list {
+  font-size: clamp(13.5px, 0.95vw, 15px);
+}
+.s4-list li {
+  padding: var(--space-2) 0 var(--space-2) var(--space-6);
+}
+.s4-chart-block {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: var(--space-2);
+  border-top: 0.5px solid var(--ink-10);
+  padding-top: var(--space-3);
+}
+.s4-chart-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+.s4-chart-title {
+  margin: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+  font-size: clamp(11px, 0.78vw, 12.5px);
+}
+.s4-chart-formula {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(13px, 0.95vw, 14.5px);
+  color: var(--ink-60);
+}
+.s4-chart-wrap {
+  flex: 1 1 auto;
+  min-height: 320px;
+  max-height: 420px;
+  width: 100%;
+  padding-bottom: var(--space-2);
+  position: relative;
+}
+.s4-chart-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .progress { transition: none; }
+  .metric.burgundy .value,
+  .metric.feature .value {
+    animation: none !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   SLIDE 7 · RESULTADOS · ROBUSTEZ
+═════════════════════════════════════════════════════════ */
+.s7-body { display: flex; flex-direction: column; gap: 22px; }
+.s7-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 24px;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.s7-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 18px;
+  align-self: start;
+}
+.s7-table thead th {
+  background: var(--burgundy);
+  color: var(--cream);
+  font-weight: 700;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.s7-table tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--burgundy-20);
+  color: var(--burgundy);
+}
+.s7-table tbody tr.s7-best td {
+  background: var(--rose-pale);
+  color: var(--burgundy);
+  font-weight: 700;
+}
+.s7-chart-wrap {
+  position: relative;
+  min-height: 240px;
+  background: var(--cream-warm);
+  border: 1px solid var(--burgundy-20);
+  border-radius: 4px;
+  padding: 14px;
+}
+.s7-chart-wrap canvas { width: 100% !important; height: 100% !important; }
+.s7-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  flex: 0 0 auto;
+}
+.s7-stat {
+  border: 1px solid var(--burgundy-20);
+  background: var(--cream);
+  padding: 14px 16px;
+  text-align: center;
+}
+.s7-stat-val {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--burgundy);
+  line-height: 1.05;
+}
+.s7-stat-lbl {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--burgundy);
+  opacity: 0.7;
+  margin-top: 4px;
+}
+.s7-stat-hi {
+  background: var(--burgundy);
+  border-color: var(--burgundy);
+}
+.s7-stat-hi .s7-stat-val { color: var(--cream); }
+.s7-stat-hi .s7-stat-lbl { color: var(--rose-pale); opacity: 1; }
+
+/* ════════════════════════════════════════════════════════
+   SLIDE 8 · RESULTADOS · COMPARATIVA
+═════════════════════════════════════════════════════════ */
+.s8-body { display: flex; flex-direction: column; gap: 26px; justify-content: center; }
+.s8-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 19px;
+  flex: 0 0 auto;
+}
+.s8-table thead th {
+  background: var(--burgundy);
+  color: var(--cream);
+  font-weight: 700;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.s8-table tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--burgundy-20);
+  color: var(--burgundy);
+}
+.s8-table tbody tr.s8-row-ag td {
+  background: var(--rose-pale);
+  color: var(--burgundy);
+  border-bottom: 2px solid var(--burgundy);
+  font-size: 21px;
+}
+.s8-gap-neg { color: var(--rose); font-style: italic; }
+.s8-callout {
+  background: var(--burgundy);
+  color: var(--cream);
+  padding: 20px 26px;
+  border-left: 6px solid var(--rose);
+  flex: 0 0 auto;
+}
+.s8-callout-title {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 16px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rose-pale);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.s8-callout p {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--cream);
+  margin: 0;
+}
+.s8-callout em { color: var(--rose-pale); font-style: italic; }
+.s8-callout strong { color: #fff; }
+
+/* ════════════════════════════════════════════════════════
+   SLIDE 9 · CONCLUSIONES
+═════════════════════════════════════════════════════════ */
+.s9-body { display: flex; flex-direction: column; justify-content: center; gap: 0; }
+.s9-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.s9-list li {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 18px;
+  align-items: start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--burgundy-20);
+}
+.s9-list li:last-child { border-bottom: none; }
+.s9-num {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 48px;
+  line-height: 1;
+  color: var(--burgundy);
+  font-weight: 700;
+  text-align: center;
+}
+.s9-text {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 16.5px;
+  line-height: 1.5;
+  color: var(--burgundy);
+  align-self: center;
+}
+.s9-text em { color: var(--rose); font-style: italic; font-weight: 600; }
+.s9-text strong { color: var(--burgundy); font-weight: 700; }
+
+/* ════════════════════════════════════════════════════════
+   SLIDE 10 · CIERRE (burgundy)
+═════════════════════════════════════════════════════════ */
+.s10-inner {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  padding: 60px 80px !important;
+  text-align: center;
+  height: 100%;
+}
+.s10-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.s10-thanks {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 84px;
+  font-weight: 700;
+  color: var(--cream);
+  margin: 0;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.s10-authors {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 24px;
+  color: var(--rose-pale);
+  margin: 18px 0 0 0;
+  font-weight: 600;
+}
+.s10-meta {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 17px;
+  color: var(--cream);
+  opacity: 0.85;
+  margin: 0;
+  font-style: italic;
+}
+.s10-repo {
+  font-family: 'Courier New', monospace;
+  font-size: 15px;
+  color: var(--rose-pale);
+  margin: 8px 0 0 0;
+  letter-spacing: 0.04em;
+}
+.s10-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 22px;
+  width: 100%;
+  max-width: 880px;
+}
+.s10-kpi {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 32px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  min-height: 150px;
+}
+.s10-kpi-val {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 68px;
+  font-weight: 700;
+  color: var(--cream);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.s10-kpi-lbl {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 16px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rose-pale);
+  opacity: 0.9;
+}
+
+@media (max-width: 1100px) {
+  .s7-main { grid-template-columns: 1fr; }
+  .s7-stats { grid-template-columns: repeat(2, 1fr); }
+  .s10-thanks { font-size: 64px; }
+  .s10-kpi-val { font-size: 52px; }
+  .s10-grid { max-width: 100%; }
+}
+
+/* ═════════════════════════════════════════════════════════
+   SLIDE 4 · METODOLOGÍA · 3 columnas iguales
+═════════════════════════════════════════════════════════ */
+.s4-body {
+  font-family: 'Times New Roman', Times, serif;
+  gap: var(--space-4);
+}
+.s4-cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  flex: 1 1 auto;
+  align-items: stretch;
+}
+.s4-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 0.5px solid var(--ink-15);
+  background: var(--cream);
+  position: relative;
+}
+.s4-card-mid {
+  background: rgba(102, 18, 31, 0.025);
+}
+.s4-card-accent {
+  background: var(--ink);
+  color: var(--cream);
+  border-color: var(--ink);
+}
+.s4-card-accent .s4-num,
+.s4-card-accent .s4-name,
+.s4-card-accent .s4-tag,
+.s4-card-accent .s4-desc,
+.s4-card-accent em {
+  color: var(--cream);
+}
+.s4-card-accent .s4-desc em {
+  color: var(--rose-pale);
+}
+.s4-card-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: var(--space-3);
+  border-bottom: 0.5px solid var(--ink-15);
+}
+.s4-card-accent .s4-card-head {
+  border-bottom-color: rgba(255, 255, 255, 0.18);
+}
+.s4-num {
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--burgundy);
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+.s4-card-accent .s4-num {
+  color: var(--rose-pale);
+}
+.s4-name {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  margin: 4px 0 0 0;
+  text-transform: none;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.s4-tag {
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-size: 14.5px;
+  color: var(--burgundy);
+  margin: 2px 0 0 0;
+  letter-spacing: 0.02em;
+}
+.s4-card-accent .s4-tag {
+  color: var(--rose-pale);
+}
+.s4-desc {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: clamp(13.5px, 0.95vw, 15px);
+  line-height: 1.55;
+  color: var(--ink);
+  margin: 0;
+}
+.s4-desc em {
+  font-style: italic;
+  color: var(--burgundy);
+}
+.s4-desc-strong {
+  font-weight: 600;
+  border-top: 0.5px dotted var(--ink-15);
+  padding-top: var(--space-3);
+  margin-top: auto;
+}
+.s4-card-accent .s4-desc-strong {
+  border-top-color: rgba(255, 255, 255, 0.15);
+}
+.s4-time {
+  margin-top: auto;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) 0 0;
+  border-top: 1px solid var(--ink-15);
+}
+.s4-card-accent .s4-time {
+  border-top-color: rgba(255, 255, 255, 0.18);
+}
+.s4-time-label {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-60);
+}
+.s4-card-accent .s4-time-label {
+  color: var(--rose-pale);
+  opacity: 0.85;
+}
+.s4-time-val {
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--burgundy);
+  letter-spacing: 0.01em;
+}
+.s4-card-accent .s4-time-val {
+  color: var(--rose-pale);
+}
+.s4-hidden-canvas {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  pointer-events: none;
+  opacity: 0;
+}
+.s4-hidden-canvas canvas {
+  width: 1px !important;
+  height: 1px !important;
+}
+
+/* ═════════════════════════════════════════════════════════
+   SLIDE 5 · ALGORITMO GENÉTICO · 7 componentes
+═════════════════════════════════════════════════════════ */
+.s5-body {
+  font-family: 'Times New Roman', Times, serif;
+  gap: var(--space-3);
+}
+.s5-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2) var(--space-5);
+  flex: 1 1 auto;
+}
+.s5-item {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-2) 0 var(--space-2) 0;
+  border-bottom: 0.5px solid var(--ink-10);
+  align-items: baseline;
+}
+.s5-item:last-child {
+  border-bottom: none;
+}
+.s5-item-key {
+  background: rgba(102, 18, 31, 0.04);
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--burgundy);
+  border-bottom-color: transparent;
+}
+.s5-num {
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--burgundy);
+  min-width: 28px;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+.s5-text {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: clamp(13.5px, 0.95vw, 15px);
+  line-height: 1.45;
+  color: var(--ink);
+}
+.s5-name {
+  font-weight: 700;
+  color: var(--ink);
+  margin-right: 4px;
+}
+.s5-text em {
+  font-style: italic;
+  color: var(--burgundy);
+}
+.s5-pill {
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--ink);
+  color: var(--cream);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  flex: 0 0 auto;
+}
+.s5-pill-tag {
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  color: var(--rose-pale);
+  text-transform: uppercase;
+}
+.s5-pill-body {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: clamp(13.5px, 0.95vw, 15px);
+  line-height: 1.5;
+  color: var(--cream);
+}
+.s5-pill-body strong {
+  color: var(--rose-pale);
+}
+
+/* ═════════════════════════════════════════════════════════
+   SLIDE 6 · RESULTADOS · CONVERGENCIA · 3 hitos narrativos
+═════════════════════════════════════════════════════════ */
+.s6-body {
+  font-family: 'Times New Roman', Times, serif;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  flex: 1 1 auto;
+}
+.s6-journey {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: stretch;
+  gap: var(--space-4);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.s6-milestone {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-4);
+  border: 0.5px solid var(--ink-15);
+  background: var(--cream);
+  text-align: center;
+}
+.s6-milestone-peak {
+  background: var(--ink);
+  color: var(--cream);
+  border-color: var(--ink);
+  position: relative;
+}
+.s6-milestone-peak::before {
+  content: 'óptimo';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--burgundy);
+  color: var(--cream);
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+}
+.s6-stage {
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-size: 14px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+}
+.s6-milestone-peak .s6-stage {
+  color: var(--rose-pale);
+}
+.s6-value {
+  font-family: 'Times New Roman', Times, serif;
+  font-weight: 700;
+  font-size: clamp(38px, 4.2vw, 60px);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--burgundy);
+}
+.s6-milestone-peak .s6-value {
+  color: var(--rose-pale);
+}
+.s6-caption {
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-size: clamp(13.5px, 0.95vw, 15px);
+  line-height: 1.45;
+  color: var(--ink);
+  margin: 0;
+  max-width: 22ch;
+}
+.s6-milestone-peak .s6-caption {
+  color: var(--cream);
+}
+.s6-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-width: 48px;
+}
+.s6-arrow-line {
+  display: block;
+  width: 100%;
+  height: 0;
+  border-top: 1px dashed var(--ink-30);
+}
+.s6-arrow-head {
+  position: absolute;
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-size: 28px;
+  color: var(--burgundy);
+  background: var(--cream);
+  padding: 0 6px;
+  line-height: 1;
+}
+.s6-sidebar {
+  border-left: 2px solid var(--burgundy);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(102, 18, 31, 0.04);
+  flex: 0 0 auto;
+}
+.s6-side-title {
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  color: var(--burgundy);
+  margin: 0 0 4px 0;
+  text-transform: none;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.s6-side-body {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: clamp(13.5px, 0.95vw, 15px);
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0;
+}
+.s6-hidden-canvas {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  pointer-events: none;
+  opacity: 0;
+}
+.s6-hidden-canvas canvas {
+  width: 1px !important;
+  height: 1px !important;
+}
+
+@media (max-width: 1100px) {
+  .s4-cols { grid-template-columns: 1fr; gap: var(--space-3); }
+  .s5-list { grid-template-columns: 1fr; }
+  .s6-journey { grid-template-columns: 1fr; }
+  .s6-arrow { min-height: 32px; transform: rotate(90deg); }
+}
+
+/* ════════════════════════════════════════════════════════
+   SLIDE 1 · PORTADA · refinos (chips métodos + big KPI panel)
+═════════════════════════════════════════════════════════ */
+.s1-subline {
+  max-width: 28ch;
+}
+.s1-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 26px;
+}
+.s1-chip {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(13px, 1vw, 15.5px);
+  color: var(--rose-pale);
+  padding: 6px 14px;
+  border: 1px solid var(--rose);
+  border-radius: 999px;
+  letter-spacing: 0.01em;
+  background: rgba(225, 82, 105, 0.06);
+}
+
+.cover .right.s1-right,
+.cover .right {
+  gap: 0;
+}
+.s1-authors-block {
+  border: none;
+  padding: 0;
+  margin-top: 0;
+}
+.s1-authors-block .kicker {
+  margin-bottom: 18px;
+}
+.s1-authors-block .authors {
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  padding: 24px 0;
+}
+
+.s1-kpi-panel {
+  margin-top: var(--space-5);
+  padding: var(--space-5) 0 0;
+  border-top: 0.5px solid var(--ink-20);
+}
+.s1-kpi-panel .kicker {
+  margin-bottom: 18px;
+}
+.s1-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  align-items: stretch;
+}
+.s1-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--cream-warm);
+  border-left: 2px solid var(--burgundy);
+  border-radius: 2px;
+}
+.s1-kpi-strong {
+  background: var(--ink);
+  border-left-color: var(--rose);
+}
+.s1-kpi-strong .s1-kpi-value {
+  color: var(--cream);
+}
+.s1-kpi-strong .s1-kpi-value em {
+  color: var(--rose);
+  font-style: italic;
+}
+.s1-kpi-strong .s1-kpi-label {
+  color: var(--rose-pale);
+}
+.s1-kpi-value {
+  font-family: var(--serif);
+  font-size: clamp(22px, 2vw, 30px);
+  font-weight: 400;
+  color: var(--burgundy);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+.s1-kpi-value em {
+  font-style: italic;
+  color: var(--burgundy);
+}
+.s1-kpi-x {
+  font-size: 0.7em;
+  color: var(--ink-60);
+  margin: 0 4px;
+}
+.s1-kpi-unit {
+  font-size: 0.7em;
+  color: var(--ink-60);
+  margin-left: 2px;
+}
+.s1-kpi-label {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(11.5px, 0.85vw, 13px);
+  color: var(--ink-60);
+  line-height: 1.3;
+}
+
+/* ════════════════════════════════════════════════════════
+   SLIDE 2 · MOTIVACIÓN · tabla HAM10000 + pregunta + complejidad
+═════════════════════════════════════════════════════════ */
+.s2-ham-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--serif);
+  font-size: clamp(13.5px, 0.95vw, 14.5px);
+  margin-top: var(--space-2);
+}
+.s2-ham-table thead th {
+  font-family: var(--serif);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  color: var(--burgundy);
+  padding: 9px 10px;
+  text-align: left;
+  border-bottom: 1.5px solid var(--ink);
+}
+.s2-ham-table thead th.num {
+  text-align: right;
+}
+.s2-ham-table tbody td {
+  padding: 8px 10px;
+  border-bottom: 0.5px solid var(--ink-10);
+  color: var(--ink-90);
+  line-height: 1.35;
+}
+.s2-ham-table tbody td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+.s2-ham-table tbody td em {
+  color: var(--ink-60);
+  font-style: italic;
+  font-size: 0.9em;
+}
+.s2-ham-table tbody tr:last-child td {
+  border-bottom: 1.5px solid var(--ink);
+}
+.s2-ham-table tbody tr.warning td {
+  color: var(--rose);
+  font-style: italic;
+}
+.s2-ham-table tbody tr.warning td em {
+  color: var(--rose);
+}
+
+.s2-question {
+  margin-bottom: var(--space-3);
+  font-size: clamp(13.5px, 0.98vw, 15px);
+  line-height: 1.5;
+  padding: var(--space-3) var(--space-4);
+}
+.s2-question strong {
+  color: var(--burgundy);
+}
+.s2-question em {
+  color: var(--burgundy);
+  font-style: italic;
+}
+.s2-question-tail {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 0.5px solid var(--ink-20);
+  font-style: italic;
+  color: var(--ink-60);
+}
+.s2-question-tail strong {
+  color: var(--burgundy);
+  font-style: normal;
+}
+
+/* ════════════════════════════════════════════════════════
+   SLIDE 3 · FORMULACIÓN MATEMÁTICA PLE · ecuaciones numeradas
+═════════════════════════════════════════════════════════ */
+.s3-formulation-grid {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: var(--space-5);
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: stretch;
+}
+.s3-main-col,
+.s3-side-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 0;
+}
+.s3-defs > div {
+  padding: 5px 0;
+  border-bottom: 0.5px solid var(--ink-05);
+  font-size: clamp(13px, 0.95vw, 14.5px);
+  line-height: 1.45;
+}
+.s3-defs > div:last-child {
+  border-bottom: none;
+}
+.s3-defs em {
+  color: var(--burgundy);
+  font-style: italic;
+}
+.s3-equations {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  flex: 1 1 auto;
+}
+.s3-eq {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--cream-warm);
+  border-left: 2px solid var(--burgundy);
+  border-radius: 2px;
+}
+.s3-eq-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-family: var(--serif);
+}
+.s3-eq-num {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(13px, 0.95vw, 14.5px);
+  color: var(--burgundy);
+  letter-spacing: 0.02em;
+}
+.s3-eq-name {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.s3-eq-math {
+  margin: 2px 0;
+}
+.s3-eq-math .katex-display {
+  margin: 4px 0 !important;
+}
+.s3-eq-math .katex {
+  font-size: 1.1em !important;
+  color: var(--ink);
+}
+.s3-eq-desc {
+  font-family: var(--serif);
+  font-size: clamp(12px, 0.88vw, 13.5px);
+  color: var(--ink-60);
+  line-height: 1.4;
+}
+.s3-eq-desc em {
+  color: var(--burgundy);
+  font-style: italic;
+}
+
+.s3-relax-callout {
+  padding: var(--space-3) var(--space-4);
+  font-size: clamp(13px, 0.92vw, 14px);
+  line-height: 1.5;
+}
+.s3-relax-callout p {
+  margin: 0;
+}
+.s3-relax-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.s3-relax-stack .metric-mini {
+  padding: var(--space-2) var(--space-3);
+}
+.s3-side-note {
+  font-family: var(--serif);
+  font-size: clamp(12px, 0.88vw, 13px);
+  color: var(--ink-60);
+  line-height: 1.4;
+  padding: var(--space-2) var(--space-3);
+  border-left: 2px solid var(--ink-20);
+  margin-top: var(--space-1);
+}
+.s3-side-note em {
+  color: var(--burgundy);
+  font-style: italic;
+}
+
+/* ─────────────────────────────────────────────
+   SLIDE 4 v2 · MÉTODO 1 · HEURÍSTICA GREEDY
+   ───────────────────────────────────────────── */
+.s4v2-body { display: flex; flex-direction: column; gap: var(--space-3); min-height: 0; }
+.s4v2-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: var(--space-5);
+  align-items: stretch;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+.s4v2-col { display: flex; flex-direction: column; min-height: 0; }
+.s4v2-col-title {
+  font-family: var(--serif);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--burgundy);
+  border-bottom: 1.5px solid var(--ink);
+  padding-bottom: 4px;
+  margin-bottom: var(--space-3);
+}
+/* Columna izquierda: pasos 1-5 */
+.s4v2-steps { display: flex; flex-direction: column; gap: 8px; flex: 1 1 auto; min-height: 0; }
+.s4v2-step {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: var(--space-3);
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--ink-10);
+}
+.s4v2-step:last-child { border-bottom: 1px solid var(--ink); }
+.s4v2-step:first-child { border-top: 1px solid var(--ink); }
+.s4v2-step-num {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--burgundy);
+  line-height: 1;
+  text-align: right;
+  padding-top: 2px;
+}
+.s4v2-step-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.s4v2-step-name {
+  font-family: var(--serif);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.s4v2-step-desc {
+  font-family: var(--serif);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-90);
+  margin: 0;
+}
+.s4v2-step-desc em { color: var(--burgundy); font-style: italic; }
+/* Columna derecha: 4 boxes propiedades */
+.s4v2-props { display: grid; grid-template-rows: repeat(4, 1fr); gap: 8px; flex: 1 1 auto; min-height: 0; }
+.s4v2-prop {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  background: var(--ink-05);
+  border-left: 2px solid var(--burgundy);
+  min-height: 0;
+}
+.s4v2-prop-label {
+  font-family: var(--serif);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--burgundy);
+  line-height: 1;
+}
+.s4v2-prop-headline {
+  font-family: var(--serif);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+  margin: 1px 0 2px;
+}
+.s4v2-prop-text {
+  font-family: var(--serif);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ink-90);
+  margin: 0;
+}
+.s4v2-prop-text em { color: var(--burgundy); font-style: italic; }
+.s4v2-prop-text strong { color: var(--burgundy); font-weight: 700; }
+
+/* ════════ SLIDE 5 v2 · MÉTODO 2 · EXACTO (B&B + ILP) ════════ */
+.s5v2-body {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  min-height: 0;
+}
+.s5v2-tree-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--space-2) var(--space-3);
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 0.5px solid var(--ink-20);
+  background: var(--paper);
+  min-height: 0;
+}
+.s5v2-tree-caption {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 11px;
+  color: var(--ink-60);
+  letter-spacing: 0.02em;
+  text-align: center;
+  margin: 0;
+}
+.s5v2-tree-svg {
+  width: 100%;
+  max-width: 780px;
+  height: auto;
+  max-height: 38dvh;
+  display: block;
+}
+.s5v2-tree-svg text {
+  font-family: var(--serif);
+  fill: var(--ink);
+}
+.s5v2-tree-svg .s5v2-node-rect {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 1.2;
+}
+.s5v2-tree-svg .s5v2-node-root {
+  fill: #fff;
+  stroke: var(--burgundy);
+  stroke-width: 1.6;
+}
+.s5v2-tree-svg .s5v2-node-prune {
+  fill: var(--ink-05);
+  stroke: var(--ink-40);
+  stroke-width: 1;
+  stroke-dasharray: 3 2;
+}
+.s5v2-tree-svg .s5v2-node-keep {
+  fill: var(--rose-pale);
+  stroke: var(--burgundy);
+  stroke-width: 1.4;
+}
+.s5v2-tree-svg .s5v2-edge {
+  stroke: var(--ink);
+  stroke-width: 1;
+  fill: none;
+}
+.s5v2-tree-svg .s5v2-edge-label {
+  font-size: 10px;
+  font-style: italic;
+  fill: var(--burgundy);
+}
+.s5v2-tree-svg .s5v2-node-title {
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.s5v2-tree-svg .s5v2-node-sub {
+  font-size: 9.5px;
+  fill: var(--ink-90);
+}
+.s5v2-tree-svg .s5v2-node-prune-text {
+  font-size: 9.5px;
+  fill: var(--ink-60);
+  font-style: italic;
+}
+.s5v2-result {
+  font-family: var(--serif);
+  font-size: 12px;
+  color: var(--ink-90);
+  text-align: center;
+  margin: 0;
+  padding: 2px 0 0;
+}
+.s5v2-result strong { color: var(--burgundy); font-weight: 700; }
+.s5v2-result em { font-style: italic; color: var(--ink-60); }
+
+.s5v2-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  min-height: 0;
+}
+.s5v2-card {
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.s5v2-card.is-rose {
+  background: var(--rose-pale);
+  border-color: var(--burgundy);
+  border-width: 1.5px;
+}
+.s5v2-card.is-green {
+  background: #e8f0ea;
+  border-color: var(--green);
+  border-width: 1.5px;
+}
+.s5v2-card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  border-bottom: 0.5px solid var(--ink-20);
+  padding-bottom: 4px;
+}
+.s5v2-card-num {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 11px;
+  color: var(--burgundy);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.s5v2-card.is-green .s5v2-card-num { color: var(--green); }
+.s5v2-card-title {
+  font-family: var(--serif);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+  margin: 0;
+}
+.s5v2-card.is-rose .s5v2-card-title { color: var(--burgundy); }
+.s5v2-card.is-green .s5v2-card-title { color: var(--green); }
+.s5v2-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.s5v2-list li {
+  font-family: var(--serif);
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--ink-90);
+  padding-left: 10px;
+  position: relative;
+}
+.s5v2-list li::before {
+  content: "·";
+  position: absolute;
+  left: 2px;
+  top: -1px;
+  color: var(--burgundy);
+  font-weight: 700;
+}
+.s5v2-card.is-green .s5v2-list li::before { color: var(--green); }
+.s5v2-list li strong { color: var(--burgundy); font-weight: 700; }
+.s5v2-card.is-green .s5v2-list li strong { color: var(--green); }
+.s5v2-list li em { color: var(--ink); font-style: italic; font-weight: 600; }
+.s5v2-card-bang {
+  font-family: var(--serif);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--burgundy);
+  margin: 2px 0 0;
+  border-top: 0.5px solid var(--burgundy-20);
+  padding-top: 4px;
+  line-height: 1.3;
+}
+.s5v2-card.is-green .s5v2-card-bang { color: var(--green); border-top-color: #4a7c5933; }
+
+@media (max-width: 900px) {
+  .s5v2-cards { grid-template-columns: 1fr; }
+  .s5v2-tree-svg { max-height: 32dvh; }
+}
+
+/* ════════════════════════════════════════════════════════
+   SLIDE 3 · SIMPLIFICACIÓN RADICAL (.s3rad-*)
+   Apoyo visual para 40s · fórmula HERO + 3 KPIs + 1 línea
+════════════════════════════════════════════════════════ */
+.s3rad-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  gap: clamp(var(--space-5), 4vh, var(--space-7));
+  padding: clamp(var(--space-4), 3vh, var(--space-6)) clamp(var(--space-5), 4vw, var(--space-8));
+  min-height: 0;
+  flex: 1;
+}
+
+/* HERO · fórmula central protagonista */
+.s3rad-hero {
+  background: var(--paper);
+  border: 0.5px solid var(--burgundy-20);
+  border-left: 3px solid var(--burgundy);
+  border-radius: 3px;
+  padding: clamp(var(--space-5), 4vh, var(--space-7)) clamp(var(--space-5), 4vw, var(--space-8));
+  font-size: clamp(20px, 2.4vw, 30px);
+  color: var(--ink);
+  text-align: center;
+  box-shadow: 0 1px 0 var(--burgundy-10);
+  overflow-x: auto;
+}
+.s3rad-hero .MathJax,
+.s3rad-hero mjx-container {
+  font-size: inherit !important;
+}
+
+/* KPIs · 3 cards grandes */
+.s3rad-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(var(--space-4), 2.5vw, var(--space-6));
+}
+.s3rad-kpi {
+  background: var(--paper);
+  border: 0.5px solid var(--burgundy-20);
+  border-top: 2px solid var(--burgundy);
+  border-radius: 2px;
+  padding: clamp(var(--space-4), 2.5vh, var(--space-5)) clamp(var(--space-4), 2vw, var(--space-5));
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.s3rad-kpi-label {
+  font-family: var(--font-sans, "Times New Roman", Times, serif);
+  font-size: clamp(11px, 1.05vw, 13px);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-60, var(--burgundy));
+  font-weight: 600;
+}
+.s3rad-kpi-value {
+  font-family: "Times New Roman", Times, serif;
+  font-size: clamp(34px, 4vw, 52px);
+  font-weight: 700;
+  color: var(--burgundy);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+.s3rad-kpi-foot {
+  font-family: "Times New Roman", Times, serif;
+  font-style: italic;
+  font-size: clamp(12px, 1.1vw, 14px);
+  color: var(--ink-70, var(--ink));
+  opacity: 0.85;
+}
+.s3rad-kpi-warn { border-top-color: var(--warn, #c2410c); }
+.s3rad-kpi-warn .s3rad-kpi-value { color: var(--warn, #c2410c); }
+
+/* PIE · 1 línea contexto */
+.s3rad-foot {
+  text-align: center;
+  font-family: "Times New Roman", Times, serif;
+  font-size: clamp(13px, 1.2vw, 16px);
+  color: var(--ink);
+  opacity: 0.78;
+  margin: 0;
+}
+.s3rad-foot em {
+  font-style: italic;
+  color: var(--burgundy);
+  font-weight: 600;
+}
+
+@media (max-height: 800px) {
+  .s3rad-hero { font-size: clamp(18px, 2vw, 26px); padding: var(--space-4) var(--space-5); }
+  .s3rad-kpi-value { font-size: clamp(28px, 3.2vw, 42px); }
+  .s3rad-kpi { padding: var(--space-3) var(--space-4); }
+}
+@media (max-width: 900px) {
+  .s3rad-kpis { grid-template-columns: 1fr; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   SLIDE 5 · RADICAL · ILP + Branch & Bound
+   prefijo .s5rad-  ·  árbol protagonista + banner único
+   ══════════════════════════════════════════════════════════ */
+.s5rad-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  height: 100%;
+  min-height: 0;
+}
+
+/* HERO · árbol B&B gigante — 65% vertical */
+.s5rad-tree-wrap {
+  flex: 0 0 65%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-3);
+}
+
+.s5rad-tree-svg {
+  width: 100%;
+  height: 100%;
+  max-height: 56dvh;
+  display: block;
+  font-family: var(--serif);
+}
+
+/* nodos */
+.s5rad-tree-svg .s5rad-node-rect {
+  fill: var(--paper);
+  stroke: var(--burgundy);
+  stroke-width: 1.4;
+}
+.s5rad-tree-svg .s5rad-node-root {
+  fill: var(--rose-pale);
+  stroke: var(--burgundy);
+  stroke-width: 2.2;
+}
+.s5rad-tree-svg .s5rad-node-prune {
+  fill: var(--paper);
+  stroke: var(--ink-40);
+  stroke-width: 1.4;
+  stroke-dasharray: 5 3;
+}
+.s5rad-tree-svg .s5rad-node-keep {
+  fill: var(--rose-pale);
+  stroke: var(--rose);
+  stroke-width: 1.6;
+}
+
+/* aristas */
+.s5rad-tree-svg .s5rad-edge {
+  stroke: var(--burgundy);
+  stroke-width: 1.4;
+  fill: none;
+}
+.s5rad-tree-svg .s5rad-edge-prune {
+  stroke: var(--ink-40);
+  stroke-dasharray: 4 3;
+}
+
+/* tipografía SVG */
+.s5rad-tree-svg .s5rad-edge-label {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  fill: var(--burgundy);
+}
+.s5rad-tree-svg .s5rad-node-title {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 17px;
+  fill: var(--ink);
+  letter-spacing: 0.01em;
+}
+.s5rad-tree-svg .s5rad-node-sub {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13.5px;
+  fill: var(--ink-60);
+}
+.s5rad-tree-svg .s5rad-root-title {
+  font-size: 19px;
+  fill: var(--burgundy);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.s5rad-tree-svg .s5rad-root-sub {
+  font-size: 15px;
+  fill: var(--ink-90);
+  font-style: italic;
+}
+.s5rad-tree-svg .s5rad-prune-title {
+  fill: var(--ink-60);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 16px;
+}
+.s5rad-tree-svg .s5rad-prune-sub {
+  fill: var(--ink-60);
+}
+.s5rad-tree-svg .s5rad-keep-title {
+  fill: var(--burgundy);
+}
+.s5rad-tree-svg .s5rad-keep-sub {
+  fill: var(--burgundy);
+  opacity: 0.78;
+}
+.s5rad-tree-svg .s5rad-foot {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 12.5px;
+  fill: var(--ink-60);
+}
+
+/* BANNER NARRATIVO — 25% vertical */
+.s5rad-banner {
+  flex: 0 0 auto;
+  position: relative;
+  background: var(--rose-pale);
+  border-left: 3px solid var(--burgundy);
+  padding: var(--space-3) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.s5rad-banner-tag {
+  font-family: var(--serif);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--burgundy);
+  font-weight: 700;
+}
+
+.s5rad-banner-body {
+  font-family: var(--serif);
+  font-size: clamp(14px, 1.15vw, 16.5px);
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0;
+}
+.s5rad-banner-body strong {
+  color: var(--burgundy);
+  font-weight: 700;
+}
+.s5rad-banner-body em {
+  font-style: italic;
+  color: var(--ink-60);
+}
+
+.s5rad-banner-punch {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(13px, 1vw, 15px);
+  color: var(--burgundy);
+  margin: 0;
+  padding-top: 4px;
+  border-top: 1px solid var(--burgundy-20);
+  letter-spacing: 0.01em;
+}
+
+@media (max-height: 800px) {
+  .s5rad-tree-svg { max-height: 50dvh; }
+  .s5rad-banner-body { font-size: 13px; line-height: 1.45; }
+  .s5rad-banner-punch { font-size: 12.5px; }
+  .s5rad-banner { padding: var(--space-2) var(--space-4); }
+}
+@media (max-width: 900px) {
+  .s5rad-tree-svg { max-height: 42dvh; }
+}
+
+/* ════════════════════════════════════════════════════════
+   SLIDE 4 · GREEDY (simplificación radical · s4rad-)
+════════════════════════════════════════════════════════ */
+.s4rad-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+  justify-content: center;
+}
+
+/* HERO · DIAGRAMA SVG */
+.s4rad-flow {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.s4rad-svg {
+  width: 100%;
+  max-width: 1000px;
+  height: auto;
+  max-height: 42dvh;
+  display: block;
+}
+.s4rad-node {
+  fill: var(--burgundy);
+  stroke: var(--burgundy);
+  stroke-width: 1;
+}
+.s4rad-num {
+  fill: var(--paper);
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-size: 22px;
+  font-weight: 400;
+  dominant-baseline: middle;
+}
+.s4rad-label {
+  fill: var(--ink);
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 13px;
+  font-style: italic;
+  letter-spacing: 0.01em;
+}
+.s4rad-edge {
+  stroke: var(--burgundy);
+  stroke-width: 1.5;
+  fill: none;
+}
+.s4rad-edge-loop {
+  stroke-dasharray: 4 3;
+  opacity: 0.7;
+}
+.s4rad-loop-label {
+  fill: var(--ink-60);
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+}
+
+/* BANNER STAT */
+.s4rad-banner {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  padding: var(--space-3) 0;
+  background: var(--paper);
+}
+.s4rad-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-3);
+  border-right: 1px solid var(--ink-20);
+  text-align: center;
+}
+.s4rad-stat:last-child { border-right: none; }
+.s4rad-stat-num {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 42px;
+  font-weight: 400;
+  color: var(--burgundy);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-feature-settings: "lnum" 1, "tnum" 1;
+}
+.s4rad-stat-unit {
+  font-size: 22px;
+  font-style: italic;
+  color: var(--burgundy);
+  margin-left: 2px;
+}
+.s4rad-stat-lbl {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-60);
+  margin-top: 8px;
+}
+
+/* PULL QUOTE */
+.s4rad-quote {
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ink-90);
+  text-align: center;
+  margin: 0;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+.s4rad-quote em {
+  color: var(--burgundy);
+  font-style: italic;
+  font-weight: 400;
+}
+
+@media (max-height: 800px) {
+  .s4rad-stat-num { font-size: 34px; }
+  .s4rad-stat-unit { font-size: 18px; }
+  .s4rad-stat-lbl { font-size: 10px; margin-top: 6px; }
+  .s4rad-quote { font-size: 13.5px; }
+  .s4rad-svg { max-height: 38dvh; }
+}
+@media (max-width: 900px) {
+  .s4rad-banner { grid-template-columns: repeat(2, 1fr); }
+  .s4rad-stat:nth-child(2) { border-right: none; }
+  .s4rad-stat:nth-child(1), .s4rad-stat:nth-child(2) {
+    border-bottom: 1px solid var(--ink-20);
+    padding-bottom: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="progress" id="progress"></div>
+
+<div class="chrome-top">
+  <div><strong>UNAB</strong> · Investigación de Operaciones · MMXXVI</div>
+  <div class="right"><a href="https://github.com/Paulasaah/setcover-pau-brayan" target="_blank">Paulasaah/setcover-pau-brayan ↗</a></div>
+</div>
+
+<div class="stage" id="stage">
+
+<!-- ════════════════════════════════════════════════════════
+     SLIDE 1 · PORTADA · Editorial Magazine
+════════════════════════════════════════════════════════ -->
+<section class="slide cover" data-slide="1">
+  <div class="slide-inner">
+    <div class="left">
+      <div class="cover-title-block">
+        <div class="kicker">Investigación de Operaciones · UNAB 2026</div>
+        <h1>
+          Set
+          <em>Cover</em>
+        </h1>
+        <div class="subline s1-subline">Selección óptima de subconjuntos de imágenes dermatológicas</div>
+        <div class="s1-methods">
+          <span class="s1-chip">Greedy Chvátal</span>
+          <span class="s1-chip">ILP + Branch &amp; Bound</span>
+          <span class="s1-chip">Algoritmo Genético</span>
+        </div>
+      </div>
+      <div class="footer-meta">
+        <strong>Sustentación · 2026-I</strong>
+        Universidad Autónoma de Bucaramanga · Facultad de Ingeniería
+      </div>
+    </div>
+    <div class="right">
+      <div class="cover-authors s1-authors-block">
+        <div class="kicker">Autores</div>
+        <div class="authors">
+          <div class="author">
+            <span class="role">Co-autora</span>
+            <span class="name">María Paula Saavedra</span>
+          </div>
+          <div class="author">
+            <span class="role">Co-autor</span>
+            <span class="name">Brayan Steven León</span>
+          </div>
+        </div>
+      </div>
+      <div class="s1-kpi-panel">
+        <div class="kicker">Instancia &amp; complejidad</div>
+        <div class="s1-kpi-grid">
+          <div class="s1-kpi">
+            <div class="s1-kpi-value">500 <span class="s1-kpi-x">×</span> 500</div>
+            <div class="s1-kpi-label">elementos × subconjuntos</div>
+          </div>
+          <div class="s1-kpi">
+            <div class="s1-kpi-value">9.99<span class="s1-kpi-unit">%</span></div>
+            <div class="s1-kpi-label">densidad de cobertura</div>
+          </div>
+          <div class="s1-kpi s1-kpi-strong">
+            <div class="s1-kpi-value"><em>NP</em>–difícil</div>
+            <div class="s1-kpi-label">Karp · 1972</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="notes">
+    <span class="notes-label">Notas · 30 s</span>
+    Presentar como caso de optimización combinatoria. El foco es Investigación de Operaciones, no dermatología. Tres métodos (Greedy, ILP, AG) sobre instancia 500×500 con 9.99% de densidad.
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     SLIDE 2 · CONTEXTO + FORMULACIÓN (consolidado)
+════════════════════════════════════════════════════════ -->
+<section class="slide" data-slide="2">
+  <div class="slide-inner">
+    <div class="s-header">
+      <div class="kicker">Motivación</div>
+      <h2 class="title title-lg">¿Por qué <em>Set Cover</em> para imágenes médicas?</h2>
+      <p class="lede">El dataset <strong>HAM10000</strong> contiene <strong>10,015 imágenes</strong> de lesiones cutáneas clasificadas en <strong>7 categorías diagnósticas</strong>. El problema: un desbalance severo de clases hace que los modelos fallen precisamente en los casos más peligrosos.</p>
+    </div>
+    <div class="s-body s2-body">
+      <div class="s2-row-bottom">
+        <div class="s2-defs-col">
+          <h3 class="label">Distribución HAM10000 · 7 categorías</h3>
+          <table class="s2-ham-table">
+            <thead>
+              <tr><th>Categoría</th><th class="num">Imágenes</th><th class="num">%</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>nv <em>(nevos)</em></td><td class="num">6,705</td><td class="num">66.95%</td></tr>
+              <tr><td>mel <em>(melanoma)</em></td><td class="num">1,113</td><td class="num">11.11%</td></tr>
+              <tr><td>bkl <em>(queratosis benigna)</em></td><td class="num">1,099</td><td class="num">10.97%</td></tr>
+              <tr><td>bcc <em>(carcinoma basal)</em></td><td class="num">514</td><td class="num">5.13%</td></tr>
+              <tr><td>akiec <em>(queratosis act.)</em></td><td class="num">327</td><td class="num">3.26%</td></tr>
+              <tr class="warning"><td>vasc <em>(vascular)</em></td><td class="num">142</td><td class="num">1.42%</td></tr>
+              <tr class="warning"><td>df <em>(dermatofibroma)</em></td><td class="num">115</td><td class="num">1.15%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="s2-stats-col">
+          <div class="callout s2-question">
+            <strong>Pregunta que motiva.</strong> ¿Cuál subconjunto de mínimo costo garantiza que <em>todas</em> las categorías diagnósticas estén representadas?
+            <div class="s2-question-tail">Esta pregunta tiene exactamente la estructura del <strong>Set Covering Problem (SCP)</strong>.</div>
+          </div>
+          <h3 class="label">Complejidad</h3>
+          <div class="s2-stats-stack">
+            <div class="metric metric-mini burgundy"><div class="label">Clasificación</div><div class="value">NP-difícil</div><div class="delta">Karp · 1972</div></div>
+            <div class="metric metric-mini"><div class="label">Espacio de búsqueda</div><div class="value">$2^{500}$</div><div class="delta">≈ 3.27 × 10<sup>150</sup> soluciones</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="notes">
+    <span class="notes-label">Notas · 60 s</span>
+    HAM10000 tiene desbalance severo: nv domina con 66.95%, mientras df y vasc apenas suman 2.57% — justamente las clases minoritarias son las más peligrosas clínicamente. La pregunta de cobertura mínima encaja literal en el SCP. Espacio 2^500 ≈ 3.27×10^150 motiva métodos exactos y metaheurísticos.
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     SLIDE 3 · FORMULACIÓN MATEMÁTICA (PLE)
+════════════════════════════════════════════════════════ -->
+<section class="slide" data-slide="3">
+  <div class="slide-inner">
+    <div class="s-header">
+      <div class="kicker">Formulación matemática</div>
+      <h2 class="title title-lg">Modelo de <em>Programación Lineal Entera</em></h2>
+    </div>
+    <div class="s-body s3rad-body">
+
+      <!-- HERO · fórmula consolidada en una línea -->
+      <div class="s3rad-hero">
+        $$ \min \; Z = \sum_{j \in J} c_j \, x_j \quad \text{s.a.} \quad \sum_{j \in J} a_{ij} \, x_j \;\ge\; 1, \;\; \forall\, i \in I; \quad x_j \in \{0,1\} $$
+      </div>
+
+      <!-- KPI CARDS · 3 grandes -->
+      <div class="s3rad-kpis">
+        <div class="s3rad-kpi">
+          <div class="s3rad-kpi-label">Cota LP $z_{LP}$</div>
+          <div class="s3rad-kpi-value">$27,859.93</div>
+          <div class="s3rad-kpi-foot">relajación fraccionaria</div>
+        </div>
+        <div class="s3rad-kpi s3rad-kpi-warn">
+          <div class="s3rad-kpi-label">Gap de integralidad</div>
+          <div class="s3rad-kpi-value">43.20%</div>
+          <div class="s3rad-kpi-foot">instancia difícil</div>
+        </div>
+        <div class="s3rad-kpi">
+          <div class="s3rad-kpi-label">Espacio de búsqueda</div>
+          <div class="s3rad-kpi-value">$2^{500}$</div>
+          <div class="s3rad-kpi-foot">combinaciones binarias</div>
+        </div>
+      </div>
+
+      <!-- PIE · una línea -->
+      <p class="s3rad-foot">500 elementos × 500 subconjuntos · <em>NP-difícil</em> desde Karp (1972)</p>
+    </div>
+  </div>
+  <div class="notes">
+    <span class="notes-label">Notas · 60 s</span>
+    Definiciones del modelo: $I=\{1,\dots,500\}$ elementos a cubrir (requisitos diagnósticos); $J=\{1,\dots,500\}$ subconjuntos disponibles (agrupaciones de imágenes); $a_{ij}\in\{0,1\}$ vale 1 si $j$ cubre al elemento $i$; $c_j\in[\$2{,}000,\$3{,}998]$ costo de seleccionar $j$; $x_j\in\{0,1\}$ variable de decisión.
+    (1) Función objetivo: minimizar el costo total de las agrupaciones seleccionadas. (2) Cobertura completa: cada elemento debe quedar cubierto por al menos un subconjunto. (3) Integralidad: decisión binaria, incluir o no cada subconjunto.
+    Relajación LP ($0\le x_j\le 1$) da cota inferior $z_{LP}=\$27{,}859.93$. Gap de integralidad ~43% anticipa alta dificultad para B&amp;B sin warm-start. Esta formulación alimenta los tres métodos: Greedy, ILP+B&amp;B y AG.
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     SLIDE 4 · DISEÑO AG + OPERADORES (consolidado)
+════════════════════════════════════════════════════════ -->
+<section class="slide" data-slide="4">
+  <div class="slide-inner">
+    <div class="s-header">
+      <div class="kicker">Método 1 · Heurística</div>
+      <h2 class="title title-lg"><em>Heurística Greedy</em> de Chvátal (1979)</h2>
+    </div>
+    <div class="s-body s4rad-body">
+
+      <!-- ── HERO · DIAGRAMA DE FLUJO SVG ── -->
+      <div class="s4rad-flow">
+        <svg class="s4rad-svg" viewBox="0 0 1000 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Flujo del algoritmo Greedy de Chvátal en 5 pasos">
+          <defs>
+            <marker id="s4rad-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#66121f"/>
+            </marker>
+          </defs>
+
+          <!-- aristas rectas entre nodos -->
+          <line class="s4rad-edge" x1="135" y1="90" x2="225" y2="90" marker-end="url(#s4rad-arrow)"/>
+          <line class="s4rad-edge" x1="335" y1="90" x2="425" y2="90" marker-end="url(#s4rad-arrow)"/>
+          <line class="s4rad-edge" x1="535" y1="90" x2="625" y2="90" marker-end="url(#s4rad-arrow)"/>
+          <line class="s4rad-edge" x1="735" y1="90" x2="825" y2="90" marker-end="url(#s4rad-arrow)"/>
+
+          <!-- loop curvo 5 → 2 -->
+          <path class="s4rad-edge s4rad-edge-loop" d="M 880 132 Q 880 200 480 200 Q 280 200 280 132" fill="none" marker-end="url(#s4rad-arrow)"/>
+          <text class="s4rad-loop-label" x="480" y="218" text-anchor="middle">repetir hasta cobertura total</text>
+
+          <!-- nodos -->
+          <g>
+            <circle class="s4rad-node" cx="80" cy="90" r="42"/>
+            <text class="s4rad-num" x="80" y="86" text-anchor="middle">1</text>
+            <text class="s4rad-label" x="80" y="106" text-anchor="middle">Inicializar</text>
+          </g>
+          <g>
+            <circle class="s4rad-node" cx="280" cy="90" r="42"/>
+            <text class="s4rad-num" x="280" y="86" text-anchor="middle">2</text>
+            <text class="s4rad-label" x="280" y="106" text-anchor="middle">Razón c<tspan baseline-shift="sub" font-size="9">j</tspan>/cob.</text>
+          </g>
+          <g>
+            <circle class="s4rad-node" cx="480" cy="90" r="42"/>
+            <text class="s4rad-num" x="480" y="86" text-anchor="middle">3</text>
+            <text class="s4rad-label" x="480" y="106" text-anchor="middle">Elegir mín</text>
+          </g>
+          <g>
+            <circle class="s4rad-node" cx="680" cy="90" r="42"/>
+            <text class="s4rad-num" x="680" y="86" text-anchor="middle">4</text>
+            <text class="s4rad-label" x="680" y="106" text-anchor="middle">Marcar cub.</text>
+          </g>
+          <g>
+            <circle class="s4rad-node" cx="880" cy="90" r="42"/>
+            <text class="s4rad-num" x="880" y="86" text-anchor="middle">5</text>
+            <text class="s4rad-label" x="880" y="106" text-anchor="middle">Repetir</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- ── BANNER STAT ── -->
+      <div class="s4rad-banner">
+        <div class="s4rad-stat">
+          <div class="s4rad-stat-num">$52,063</div>
+          <div class="s4rad-stat-lbl">costo</div>
+        </div>
+        <div class="s4rad-stat">
+          <div class="s4rad-stat-num">23</div>
+          <div class="s4rad-stat-lbl">subconjuntos</div>
+        </div>
+        <div class="s4rad-stat">
+          <div class="s4rad-stat-num">4.6<span class="s4rad-stat-unit">ms</span></div>
+          <div class="s4rad-stat-lbl">tiempo</div>
+        </div>
+        <div class="s4rad-stat">
+          <div class="s4rad-stat-num">+6.14<span class="s4rad-stat-unit">%</span></div>
+          <div class="s4rad-stat-lbl">gap vs óptimo</div>
+        </div>
+      </div>
+
+      <!-- ── PULL QUOTE ── -->
+      <p class="s4rad-quote">Decisiones miopes — nunca peor que $H(d) \cdot z^{*} \approx 7.2\times$ el óptimo. <em>Chvátal (1979)</em></p>
+
+    </div>
+    <!-- Canvas oculto: requerido por el script global, no se modifica el ID -->
+    <div class="s4-hidden-canvas" aria-hidden="true"><canvas id="mutChart"></canvas></div>
+  </div>
+  <div class="notes">
+    <span class="notes-label">Notas · 40 s</span>
+    Cómo funciona el Greedy: (1) Inicializar: ningún subconjunto, 500 elementos sin cubrir. (2) Calcular razón: para cada $j$, razón = $c_j$ / (nuevos elementos cubiertos). (3) Seleccionar: elegir $j^{*}$ con razón mínima. (4) Actualizar: marcar $j^{*}$ como elegido y sus elementos como cubiertos. (5) Repetir hasta cobertura total. — Propiedades: Garantía $H(d) \approx \ln(500)+1 \approx 7.2\times$ el óptimo. Complejidad $O(m \cdot n)$ por iteración, ~500 iteraciones. Rol: línea base + warm-start del 5% greedy perturbado del AG. Limitación: decisiones miopes, gap real +6.14% vs óptimo. Resultado: $52,063, 23 subconjuntos, 4.6 ms.
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     SLIDE 5 · MÉTODO 2 · EXACTO (placeholder para agent β)
+════════════════════════════════════════════════════════ -->
+<section class="slide" data-slide="5">
+  <div class="slide-inner">
+    <div class="s-header">
+      <div class="kicker">MÉTODO 2 · EXACTO</div>
+      <h2 class="title title-lg">Programación Lineal Entera + <em>Branch &amp; Bound</em></h2>
+    </div>
+    <div class="s-body s5rad-body">
+
+      <!-- ── HERO · ÁRBOL B&B GIGANTE (65% vertical) ── -->
+      <div class="s5rad-tree-wrap">
+        <svg class="s5rad-tree-svg" viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Árbol Branch and Bound — protagonista">
+          <!-- aristas -->
+          <path class="s5rad-edge" d="M 400 110 L 230 200" />
+          <path class="s5rad-edge" d="M 400 110 L 570 200" />
+          <path class="s5rad-edge s5rad-edge-prune" d="M 230 250 L 130 330" />
+          <path class="s5rad-edge" d="M 570 250 L 670 330" />
+
+          <!-- etiquetas de ramas -->
+          <text class="s5rad-edge-label" x="290" y="160" text-anchor="middle">forzar x₄₇ = 0</text>
+          <text class="s5rad-edge-label" x="510" y="160" text-anchor="middle">forzar x₄₇ = 1</text>
+
+          <!-- NODO RAÍZ (grande) -->
+          <rect class="s5rad-node-root" x="300" y="50" width="200" height="60" rx="3" />
+          <text class="s5rad-node-title s5rad-root-title" x="400" y="76" text-anchor="middle">LP relax</text>
+          <text class="s5rad-node-sub s5rad-root-sub" x="400" y="98" text-anchor="middle">z_LP = $27,860 · x₄₇ = 0.73</text>
+
+          <!-- hijo izquierdo -->
+          <rect class="s5rad-node-rect" x="140" y="200" width="180" height="50" rx="3" />
+          <text class="s5rad-node-title" x="230" y="222" text-anchor="middle">Subproblema 1</text>
+          <text class="s5rad-node-sub" x="230" y="240" text-anchor="middle">subconjunto 47 fuera</text>
+
+          <!-- hijo derecho -->
+          <rect class="s5rad-node-rect" x="480" y="200" width="180" height="50" rx="3" />
+          <text class="s5rad-node-title" x="570" y="222" text-anchor="middle">Subproblema 2</text>
+          <text class="s5rad-node-sub" x="570" y="240" text-anchor="middle">subconjunto 47 dentro</text>
+
+          <!-- hoja izquierda: PODA -->
+          <rect class="s5rad-node-prune" x="40" y="330" width="180" height="50" rx="3" />
+          <text class="s5rad-node-title s5rad-prune-title" x="130" y="352" text-anchor="middle">PODA</text>
+          <text class="s5rad-node-sub s5rad-prune-sub" x="130" y="370" text-anchor="middle">LB ≥ UB</text>
+
+          <!-- hoja derecha: Continuar -->
+          <rect class="s5rad-node-keep" x="580" y="330" width="180" height="50" rx="3" />
+          <text class="s5rad-node-title s5rad-keep-title" x="670" y="352" text-anchor="middle">Continuar</text>
+          <text class="s5rad-node-sub s5rad-keep-sub" x="670" y="370" text-anchor="middle">ramificar var. fracc.</text>
+
+          <!-- anotación pie -->
+          <text class="s5rad-foot" x="400" y="410" text-anchor="middle">cada nodo: relajación LP + cota dual · podar cuando LB ≥ UB</text>
+        </svg>
+      </div>
+
+      <!-- ── BANNER NARRATIVO ÚNICO (25% vertical) ── -->
+      <div class="s5rad-banner">
+        <span class="s5rad-banner-tag">Hallazgo</span>
+        <p class="s5rad-banner-body">
+          CBC estándar reportó <em>$50,123</em> como <em>‘Optimal’</em>.
+          El AG con semilla <strong>13</strong> encontró <strong>$49,051</strong> en 57 s.
+          ILP refinado <em>(warm-start AG, tol. = 0)</em> confirmó <strong>z* = $49,051</strong>.
+        </p>
+        <p class="s5rad-banner-punch">
+          → El solver mintió. La metaheurística destapó el óptimo real.
+        </p>
+      </div>
+
+    </div>
+  </div>
+  <div class="notes">
+    <span class="notes-label">Notas · 40 s</span>
+    Branch &amp; Bound resuelve el ILP ramificando sobre variables fraccionarias.
+    En la raíz se resuelve la relajación LP que da z_LP = $27,860 con x₄₇ = 0.73 fraccionario.
+    Se ramifica forzando x₄₇ = 0 / x₄₇ = 1.
+    Configuración estándar (primera corrida): solver CBC (COIN Branch &amp; Cut), tiempo límite 600 s,
+    tolerancia gap relativo 10⁻⁴. Reportó $50,123 como 'Optimal' — no era el óptimo real.
+    Problema detectado por AG: semilla 13 encontró $49,051 en 57 s, $1,072 mejor que el 'óptimo' de CBC;
+    el solver convergió prematuramente.
+    ILP refinado (segunda corrida): warm-start desde solución AG, tolerancia gap = 0 (exactitud total),
+    tiempo extendido a 1200 s. Confirmó z* = $49,051 como óptimo verdadero.
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     SLIDE 6 · MÉTODO 3 · METAHEURÍSTICA AG (ciclo evolutivo)
+════════════════════════════════════════════════════════ -->
+<section class="slide" data-slide="6">
+  <div class="slide-inner">
+    <div class="s-header">
+      <div class="kicker">Método 3 · Metaheurística</div>
+      <h2 class="title title-lg">Algoritmo Genético — <em>Beasley &amp; Chu (1996)</em></h2>
+    </div>
+    <div class="s-body s6rad-body">
+      <div class="s6rad-grid">
+        <div class="s6rad-cycle">
+          <div class="s6rad-label">Ciclo evolutivo</div>
+          <ol class="s6rad-cards">
+            <li class="s6rad-card">
+              <span class="s6rad-num">1</span>
+              <span class="s6rad-name">Población</span>
+              <span class="s6rad-line">150 ind. · 5% greedy + 95% aleat.</span>
+            </li>
+            <li class="s6rad-card">
+              <span class="s6rad-num">2</span>
+              <span class="s6rad-name">Fitness</span>
+              <span class="s6rad-line">$f + 10^{8}\!\cdot\!$penalty</span>
+            </li>
+            <li class="s6rad-card">
+              <span class="s6rad-num">3</span>
+              <span class="s6rad-name">Torneo $k=3$</span>
+              <span class="s6rad-line">Selección robusta</span>
+            </li>
+            <li class="s6rad-card">
+              <span class="s6rad-num">4</span>
+              <span class="s6rad-name">Cruce uniforme</span>
+              <span class="s6rad-line">$p_c = 0.9$ · bit a bit</span>
+            </li>
+            <li class="s6rad-card">
+              <span class="s6rad-num">5</span>
+              <span class="s6rad-name">Mutación adapt.</span>
+              <span class="s6rad-line">3% → 0.5% lineal</span>
+            </li>
+            <li class="s6rad-card s6rad-card-key">
+              <span class="s6rad-num">6</span>
+              <span class="s6rad-name">Reparación + Elitismo</span>
+              <span class="s6rad-line">3 mejores intactos</span>
+            </li>
+          </ol>
+        </div>
+        <aside class="s6rad-params">
+          <div class="s6rad-label">Hiperparámetros</div>
+          <table class="s6rad-table">
+            <tbody>
+              <tr><td>Población</td><td>150</td></tr>
+              <tr><td>Generaciones</td><td>500</td></tr>
+              <tr><td>Cruce $p_c$</td><td>0.90</td></tr>
+              <tr><td>Mutación $p_m$</td><td>0.030 → 0.005</td></tr>
+              <tr><td>Torneo</td><td>$k = 3$</td></tr>
+              <tr><td>Elitismo</td><td>3</td></tr>
+              <tr class="s6rad-seed"><td>Semilla</td><td><strong>13</strong></td></tr>
+            </tbody>
+          </table>
+        </aside>
+      </div>
+    </div>
+  </div>
+  <div class="notes">
+    <span class="notes-label">Notas · 40 s</span>
+    Ciclo evolutivo del AG (Beasley &amp; Chu 1996):
+    <br><br>
+    <strong>1. Población inicial (G=0):</strong> 150 individuos. 5% greedy perturbado (2–8 bit-flips sobre Chvátal) + 95% aleatorio factible. Todos pasan por reparación.
+    <br>
+    <strong>2. Evaluación:</strong> $f(\mathbf{x}) = \sum c_j x_j + 10^{8}\cdot|\text{no cubiertos}|$. BIG_M hace que infactible sea peor que cualquier factible.
+    <br>
+    <strong>3. Torneo $k=3$:</strong> 3 individuos al azar, gana el de menor fitness. Más robusto que ruleta.
+    <br>
+    <strong>4. Cruce uniforme $p_c=0.9$:</strong> cada bit del hijo se hereda de padre 1 o 2 con prob 0.5 independientemente.
+    <br>
+    <strong>5. Mutación adaptativa:</strong> $p_m$ baja linealmente 3% (gen 1) → 0.5% (gen 500).
+    <br>
+    <strong>6. Reparación + Elitismo:</strong> toda solución pasa por reparación 2 fases. 3 mejores pasan intactos (convergencia monótona).
+    <br><br>
+    <em>¿Por qué cruce uniforme y no de 1 punto?</em> En SCP, el aporte de cada subconjunto a la cobertura es independiente de su posición. Beasley &amp; Chu lo verificaron empíricamente: el uniforme supera al de 1 punto en todas las instancias de la OR-Library.
+  </div>
+</section>
+
+<style>
+/* ────────── SLIDE 6 RAD · Ciclo evolutivo AG (6 cards + tabla compacta) ────────── */
+.s6rad-body {
+  gap: var(--space-4);
+  overflow: hidden;
+}
+
+.s6rad-grid {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: var(--space-5);
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.s6rad-label {
+  font-family: var(--serif);
+  font-size: clamp(10.5px, 0.72vw, 11.5px);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--burgundy);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1.5px solid var(--ink);
+}
+
+/* Lado izquierdo: 6 cards en grid 3×2 */
+.s6rad-cycle {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.s6rad-cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: var(--space-3);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.s6rad-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-3);
+  border: 0.5px solid var(--ink-10);
+  background: #fff;
+  transition: border-color 0.2s ease;
+  min-width: 0;
+}
+
+.s6rad-card:hover {
+  border-color: var(--rose);
+}
+
+.s6rad-num {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(28px, 2.6vw, 38px);
+  line-height: 1;
+  color: var(--burgundy);
+  letter-spacing: -0.02em;
+  font-variant-numeric: lining-nums;
+  margin-bottom: var(--space-2);
+}
+
+.s6rad-name {
+  display: block;
+  font-family: var(--serif);
+  font-weight: 700;
+  color: var(--ink);
+  font-size: clamp(12.5px, 0.92vw, 14px);
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+
+.s6rad-line {
+  display: block;
+  font-size: clamp(11px, 0.78vw, 12px);
+  font-style: italic;
+  color: var(--ink-60);
+  line-height: 1.35;
+}
+
+.s6rad-card-key {
+  border-color: var(--burgundy);
+  background: var(--rose-pale);
+}
+.s6rad-card-key .s6rad-num { color: var(--rose); }
+.s6rad-card-key .s6rad-name { color: var(--burgundy); }
+
+/* Lado derecho: tabla compacta */
+.s6rad-params {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding-left: var(--space-5);
+  border-left: 0.5px solid var(--ink-10);
+}
+
+.s6rad-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: clamp(12px, 0.88vw, 13.5px);
+  font-variant-numeric: tabular-nums;
+}
+
+.s6rad-table tbody td {
+  padding: var(--space-2) 0;
+  line-height: 1.3;
+  border-bottom: 0.5px solid var(--ink-10);
+  color: var(--ink-90);
+}
+
+.s6rad-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.s6rad-table tbody td:first-child {
+  color: var(--ink-60);
+  font-style: italic;
+}
+
+.s6rad-table tbody td:last-child {
+  text-align: right;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.s6rad-seed td {
+  background: var(--rose-pale);
+  color: var(--burgundy) !important;
+  padding-left: var(--space-2) !important;
+  padding-right: var(--space-2) !important;
+}
+.s6rad-seed td:first-child { font-style: normal !important; font-weight: 600; }
+.s6rad-seed td:last-child strong { color: var(--burgundy); font-weight: 700; }
+</style>
+
+<!-- ════════════════════════════════════════════════════════
+     SLIDE 7 · AG · COMPONENTE DECISIVO · Operador de reparación 2 fases
+════════════════════════════════════════════════════════ -->
+<section class="slide" data-slide="7">
+  <div class="slide-inner s7v2-inner">
+    <div class="s-header">
+      <div class="kicker">AG · Componente decisivo</div>
+      <h2 class="title title-lg">Operador de reparación en <em>2 fases</em></h2>
+    </div>
+    <div class="s-body s7v2-body">
+
+      <div class="s7v2-phases">
+
+        <!-- ═══════ FASE 1 ═══════ -->
+        <article class="s7v2-phase">
+          <header class="s7v2-phase-head">
+            <span class="s7v2-num">1</span>
+            <div class="s7v2-phase-titles">
+              <span class="s7v2-phase-label">Fase 1</span>
+              <h3 class="s7v2-phase-title">Restaurar factibilidad</h3>
+            </div>
+          </header>
+
+          <p class="s7v2-phase-lede">Mientras existan elementos sin cubrir:</p>
+
+          <ol class="s7v2-steps">
+            <li>
+              <span class="s7v2-step-n">1</span>
+              <div class="s7v2-step-body">
+                Para cada subconjunto <em>j</em> no seleccionado:
+                <div class="s7v2-code">ganancia<sub>j</sub> = |{ i sin cubrir : a<sub>ij</sub> = 1 }|</div>
+              </div>
+            </li>
+            <li>
+              <span class="s7v2-step-n">2</span>
+              <div class="s7v2-step-body">
+                Elegir <em>j*</em> que minimiza <span class="s7v2-inline-code">c<sub>j</sub> / ganancia<sub>j</sub></span>
+                <span class="s7v2-step-aside">— mismo criterio greedy de Chvátal.</span>
+              </div>
+            </li>
+            <li>
+              <span class="s7v2-step-n">3</span>
+              <div class="s7v2-step-body">
+                Añadir <em>j*</em> a la solución y marcar sus elementos como cubiertos.
+              </div>
+            </li>
+          </ol>
+
+          <div class="s7v2-guarantee">
+            <span class="s7v2-guarantee-tag">Garantiza</span>
+            Al salir, los 500 elementos están cubiertos.
+          </div>
+        </article>
+
+        <!-- ═══════ FASE 2 ═══════ -->
+        <article class="s7v2-phase">
+          <header class="s7v2-phase-head">
+            <span class="s7v2-num">2</span>
+            <div class="s7v2-phase-titles">
+              <span class="s7v2-phase-label">Fase 2</span>
+              <h3 class="s7v2-phase-title">Eliminar redundancias</h3>
+            </div>
+          </header>
+
+          <p class="s7v2-phase-lede">Ordenar los seleccionados de mayor a menor costo — los más caros primero.</p>
+
+          <ol class="s7v2-steps">
+            <li>
+              <span class="s7v2-step-n">1</span>
+              <div class="s7v2-step-body">
+                Quitar <em>j</em> temporalmente de la solución.
+              </div>
+            </li>
+            <li>
+              <span class="s7v2-step-n">2</span>
+              <div class="s7v2-step-body">
+                ¿Todos los elementos siguen cubiertos por los restantes?
+                <div class="s7v2-branches">
+                  <span class="s7v2-branch s7v2-branch-yes"><strong>Sí</strong> · eliminar <em>j</em> (era redundante)</span>
+                  <span class="s7v2-branch s7v2-branch-no"><strong>No</strong> · devolver <em>j</em> a la solución</span>
+                </div>
+              </div>
+            </li>
+          </ol>
+
+          <div class="s7v2-guarantee">
+            <span class="s7v2-guarantee-tag">Garantiza</span>
+            Solución mínima localmente óptima.
+          </div>
+        </article>
+
+      </div>
+
+      <!-- ═══════ Comparación impacto ═══════ -->
+      <div class="s7v2-impact">
+
+        <article class="s7v2-card s7v2-card-rose">
+          <header class="s7v2-card-head">
+            <span class="s7v2-card-tag">Sin operador de reparación</span>
+            <span class="s7v2-card-glyph" aria-hidden="true">×</span>
+          </header>
+          <p class="s7v2-card-body">
+            Soluciones infactibles no penalizadas → el AG converge a regiones inválidas del espacio.
+          </p>
+          <p class="s7v2-card-metric">
+            Gap típico en literatura · <strong>5%–10%</strong> respecto al óptimo.
+          </p>
+        </article>
+
+        <article class="s7v2-card s7v2-card-green">
+          <header class="s7v2-card-head">
+            <span class="s7v2-card-tag">Con operador de reparación</span>
+            <span class="s7v2-card-glyph" aria-hidden="true">✓</span>
+          </header>
+          <p class="s7v2-card-body">
+            Toda solución es siempre factible y compacta tras cada generación.
+          </p>
+          <p class="s7v2-card-metric">
+            Gap observado · <strong>0%–3.55%</strong> &nbsp;·&nbsp; Semilla 13 · <strong>óptimo exacto $49,051</strong>.
+          </p>
+        </article>
+
+      </div>
+
+    </div>
+  </div>
+
+  <div class="slide-notes">
+    <span class="notes-label">Notas · 55 s</span>
+    Componente #7 de Beasley &amp; Chu. La Fase 1 usa el mismo criterio greedy de Chvátal — costo sobre cobertura nueva — hasta cerrar factibilidad. La Fase 2 barre redundancias del más caro al más barato. Sin este operador, el AG colapsa a búsqueda aleatoria penalizada; con él, alcanzamos óptimo exacto en semilla 13.
+  </div>
+</section>
+
+<style>
+/* ════════════════════════════════════════════════════════
+   SLIDE 7 v2 · Operador de reparación (s7v2-*)
+════════════════════════════════════════════════════════ */
+.s7v2-inner { gap: var(--space-4); }
+
+.s7v2-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+}
+
+/* Grid 2 columnas — fases */
+.s7v2-phases {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.s7v2-phase {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  background: var(--cream);
+  border: 0.5px solid var(--burgundy-20);
+  border-radius: 2px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  min-height: 0;
+}
+
+.s7v2-phase::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: var(--burgundy);
+}
+
+.s7v2-phase-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 0.5px solid var(--burgundy-20);
+}
+
+.s7v2-num {
+  font-family: var(--serif);
+  font-size: clamp(40px, 3.6vw, 56px);
+  font-weight: 400;
+  line-height: 0.9;
+  color: var(--burgundy);
+  letter-spacing: -0.02em;
+  font-feature-settings: "lnum";
+}
+
+.s7v2-phase-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.s7v2-phase-label {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--burgundy);
+  font-weight: 700;
+}
+
+.s7v2-phase-title {
+  font-family: var(--serif);
+  font-size: clamp(19px, 1.5vw, 23px);
+  font-weight: 400;
+  font-style: italic;
+  color: var(--ink);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.s7v2-phase-lede {
+  font-family: var(--serif);
+  font-size: clamp(13px, 0.95vw, 14.5px);
+  line-height: 1.4;
+  color: var(--ink-90);
+  font-style: italic;
+}
+
+/* Pasos numerados */
+.s7v2-steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+}
+
+.s7v2-steps li {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.s7v2-step-n {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--burgundy);
+  background: var(--burgundy-10);
+  border-radius: 50%;
+  width: 20px; height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.s7v2-step-body {
+  font-family: var(--serif);
+  font-size: clamp(12.5px, 0.92vw, 14px);
+  line-height: 1.45;
+  color: var(--ink-90);
+}
+
+.s7v2-step-body em {
+  font-style: italic;
+  color: var(--burgundy);
+  font-weight: 600;
+}
+
+.s7v2-step-aside {
+  color: var(--ink-60);
+  font-style: italic;
+  font-size: 0.92em;
+}
+
+.s7v2-code {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--burgundy);
+  background: var(--burgundy-10);
+  padding: 4px 8px;
+  margin-top: 4px;
+  border-left: 2px solid var(--burgundy);
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+}
+
+.s7v2-inline-code {
+  font-family: var(--mono);
+  font-size: 0.88em;
+  color: var(--burgundy);
+  background: var(--burgundy-10);
+  padding: 1px 5px;
+  border-radius: 1px;
+}
+
+/* Branches Sí/No */
+.s7v2-branches {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 5px;
+}
+
+.s7v2-branch {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-left: 2px solid;
+  line-height: 1.4;
+  letter-spacing: 0.005em;
+}
+
+.s7v2-branch strong {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.s7v2-branch-yes {
+  border-color: var(--green);
+  background: rgba(74, 124, 89, 0.07);
+  color: var(--ink-90);
+}
+.s7v2-branch-yes strong { color: var(--green); }
+
+.s7v2-branch-no {
+  border-color: var(--rose);
+  background: var(--rose-20);
+  color: var(--ink-90);
+}
+.s7v2-branch-no strong { color: var(--burgundy); }
+
+/* Garantiza · banner pie de fase */
+.s7v2-guarantee {
+  margin-top: auto;
+  padding: 7px 10px;
+  background: var(--burgundy);
+  color: var(--cream);
+  font-family: var(--serif);
+  font-size: clamp(12px, 0.9vw, 13.5px);
+  line-height: 1.35;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-style: italic;
+}
+
+.s7v2-guarantee-tag {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-style: normal;
+  color: var(--rose-pale);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ═══════ Comparación impacto ═══════ */
+.s7v2-impact {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  flex-shrink: 0;
+}
+
+.s7v2-card {
+  padding: var(--space-3) var(--space-4);
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 0.5px solid;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.s7v2-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.s7v2-card-tag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.s7v2-card-glyph {
+  font-family: var(--serif);
+  font-size: 26px;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.s7v2-card-body {
+  font-family: var(--serif);
+  font-size: clamp(12.5px, 0.92vw, 14px);
+  line-height: 1.45;
+  color: var(--ink-90);
+}
+
+.s7v2-card-metric {
+  font-family: var(--serif);
+  font-size: clamp(12px, 0.88vw, 13.5px);
+  line-height: 1.4;
+  font-style: italic;
+  padding-top: 5px;
+  border-top: 0.5px solid var(--ink-10);
+}
+
+.s7v2-card-metric strong {
+  font-style: normal;
+  font-weight: 700;
+}
+
+/* Card · sin reparación (rose / warning) */
+.s7v2-card-rose {
+  background: var(--rose-20);
+  border-color: var(--rose);
+}
+.s7v2-card-rose .s7v2-card-tag { color: var(--burgundy); }
+.s7v2-card-rose .s7v2-card-glyph { color: var(--rose); }
+.s7v2-card-rose .s7v2-card-metric strong { color: var(--burgundy); }
+
+/* Card · con reparación (green / soft) */
+.s7v2-card-green {
+  background: rgba(74, 124, 89, 0.09);
+  border-color: var(--green);
+}
+.s7v2-card-green .s7v2-card-tag { color: var(--green); }
+.s7v2-card-green .s7v2-card-glyph { color: var(--green); }
+.s7v2-card-green .s7v2-card-metric strong { color: var(--green); }
+
+/* Responsive — viewports estrechos / cortos */
+@media (max-width: 1400px) {
+  .s7v2-phase { padding: var(--space-3) var(--space-4); gap: var(--space-2); }
+  .s7v2-phases { gap: var(--space-4); }
+  .s7v2-num { font-size: clamp(34px, 3vw, 46px); }
+}
+
+@media (max-height: 800px) {
+  .s7v2-phase-lede { font-size: 12.5px; }
+  .s7v2-step-body { font-size: 12px; }
+  .s7v2-code { font-size: 10.5px; padding: 3px 7px; }
+  .s7v2-guarantee { padding: 5px 9px; font-size: 12px; }
+  .s7v2-card-body { font-size: 12px; }
+  .s7v2-card-metric { font-size: 12px; }
+  .s7v2-num { font-size: 38px; }
+}
+</style>
+
+<!-- ════════════════════════════════════════════════════════
+     SLIDE 8 · RESULTADOS · CONVERGENCIA
+════════════════════════════════════════════════════════ -->
+<section class="slide" data-slide="8">
+  <div class="slide-inner">
+    <div class="s-header">
+      <div class="kicker">Capítulo V · Resultados</div>
+      <h2 class="title title-lg">Resultados · <em>Convergencia</em></h2>
+      <p class="lede">El AG alcanza el óptimo verdadero en la generación 220 — trayectoria desde una población aleatoria de costo $82,000 hasta certificar $49,051 antes de la mitad de las 500 generaciones.</p>
+    </div>
+    <div class="s-body s6-body">
+      <div class="s6-journey">
+
+        <article class="s6-milestone">
+          <div class="s6-stage">Inicio</div>
+          <div class="s6-value">$82,000</div>
+          <p class="s6-caption">Población aleatoria sin refinar.</p>
+        </article>
+
+        <div class="s6-arrow" aria-hidden="true">
+          <span class="s6-arrow-line"></span>
+          <span class="s6-arrow-head">→</span>
+        </div>
+
+        <article class="s6-milestone s6-milestone-peak">
+          <div class="s6-stage">Gen. ~220</div>
+          <div class="s6-value">$49,051</div>
+          <p class="s6-caption">= óptimo ILP · semilla 13</p>
+        </article>
+
+        <div class="s6-arrow" aria-hidden="true">
+          <span class="s6-arrow-line"></span>
+          <span class="s6-arrow-head">→</span>
+        </div>
+
+        <article class="s6-milestone">
+          <div class="s6-stage">Salida</div>
+          <div class="s6-value">57.1 s</div>
+          <p class="s6-caption">500 generaciones totales.</p>
+        </article>
+
+      </div>
+
+      <aside class="s6-sidebar">
+        <h3 class="s6-side-title">Media → óptimo</h3>
+        <p class="s6-side-body">La población converge al final de la corrida: el promedio se aproxima al mejor individuo, signo de que el AG agotó la diversidad útil.</p>
+      </aside>
+    </div>
+    <!-- Canvas oculto: requerido por el script global, no se modifica el ID -->
+    <div class="s6-hidden-canvas" aria-hidden="true"><canvas id="resultsChart"></canvas></div>
+  </div>
+  <div class="notes">
+    <span class="notes-label">Notas · 60 s</span>
+    El AG arranca en $82,000 (aleatorio), cae a $49,051 hacia la generación 220 y mantiene el óptimo hasta la 500. Tiempo total 57.1 s. Subrayar: el verdadero óptimo se alcanza en menos de la mitad del horizonte, el resto es certificación por elitismo.
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     SLIDE 7 · HALLAZGO (DARK · climax)
+════════════════════════════════════════════════════════ -->
+<section class="slide" data-slide="9">
+  <div class="slide-inner">
+    <div class="s-header">
+      <div class="kicker">Capítulo VI · Resultados</div>
+      <h2 class="title title-lg">Resultados · <em>Robustez</em></h2>
+      <p class="lede">5 semillas independientes — <em>CV = 1.37%</em></p>
+    </div>
+    <div class="s-body s7-body">
+      <div class="s7-main">
+        <table class="s7-table">
+          <thead><tr><th>Semilla</th><th>Costo</th><th>Gap ILP</th></tr></thead>
+          <tbody>
+            <tr><td>7</td><td>$50,511</td><td>+2.98%</td></tr>
+            <tr class="optimo s7-best"><td>13</td><td>$49,051</td><td>0.00% ✅</td></tr>
+            <tr><td>21</td><td>$50,253</td><td>+2.45%</td></tr>
+            <tr><td>42</td><td>$50,546</td><td>+3.05%</td></tr>
+            <tr><td>99</td><td>$50,795</td><td>+3.55%</td></tr>
+          </tbody>
+        </table>
+        <div class="s7-chart-wrap"><canvas id="robustChart"></canvas></div>
+      </div>
+      <div class="s7-stats">
+        <div class="s7-stat"><div class="s7-stat-val">$50,231</div><div class="s7-stat-lbl">Media</div></div>
+        <div class="s7-stat"><div class="s7-stat-val">$687</div><div class="s7-stat-lbl">Desv. std</div></div>
+        <div class="s7-stat s7-stat-hi"><div class="s7-stat-val">1.37%</div><div class="s7-stat-lbl">CV</div></div>
+        <div class="s7-stat"><div class="s7-stat-val">3.55%</div><div class="s7-stat-lbl">Max gap</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="notes">
+    <span class="notes-label">Notas · 50 s</span>
+    Cinco corridas independientes confirman estabilidad. CV de 1.37% indica algoritmo robusto. Peor seed: +3.55% sobre el óptimo. Semilla 13 = óptimo verdadero certificado por ILP refinado.
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     SLIDE 8 · GAP + ROBUSTEZ (consolidado)
+════════════════════════════════════════════════════════ -->
+<section class="slide" data-slide="10">
+  <div class="slide-inner">
+    <div class="s-header">
+      <div class="kicker">Capítulo VII · Resultados</div>
+      <h2 class="title title-lg">Resultados · <em>Comparativa</em></h2>
+      <p class="lede">El AG es <em>21× más rápido</em> que el ILP refinado con igual calidad</p>
+    </div>
+    <div class="s-body s8-body">
+      <table class="s8-table">
+        <thead><tr><th>Método</th><th>Costo</th><th>|S|</th><th>Tiempo</th><th>Gap</th></tr></thead>
+        <tbody>
+          <tr><td>LP Relajado</td><td>$27,860</td><td>—</td><td>&lt;1 s</td><td class="s8-gap-neg">−43.2%</td></tr>
+          <tr><td>Greedy Chvátal</td><td>$52,063</td><td>23</td><td>4.6 ms</td><td>+6.14%</td></tr>
+          <tr class="s8-row-ag"><td><strong>AG (semilla 13)</strong></td><td><strong>$49,051</strong></td><td><strong>22</strong></td><td><strong>57 s</strong></td><td><strong>0.00% ✅</strong></td></tr>
+          <tr><td>ILP (CBC ref.)</td><td>$49,051</td><td>22</td><td>1200 s</td><td>ref.</td></tr>
+        </tbody>
+      </table>
+      <div class="s8-callout">
+        <div class="s8-callout-title">Hallazgo clave</div>
+        <p>El solver CBC con config. estándar (600 s, tol. 10⁻⁴) reportó <em>$50,123</em> como <em>'Optimal'</em> sin serlo. El AG con semilla 13 encontró <strong>$49,051 en 57 s</strong> — motivando un ILP refinado (warm-start, tol.=0, 1200 s) que confirmó el óptimo verdadero.</p>
+      </div>
+    </div>
+  </div>
+  <div class="notes">
+    <span class="notes-label">Notas · 60 s</span>
+    Orden de lectura: LP → Greedy → AG (descubrió el óptimo) → ILP refinado (lo certificó). El AG iguala calidad del ILP a una fracción del tiempo (21×). El CBC estándar mintió: reportó "Optimal" en $50,123 cuando el real era $49,051.
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     SLIDE 9 · COMPARACIÓN + REPRODUCIBILIDAD (consolidado)
+════════════════════════════════════════════════════════ -->
+<section class="slide" data-slide="11">
+  <div class="slide-inner">
+    <div class="s-header">
+      <div class="kicker">Capítulo VIII · Cierre</div>
+      <h2 class="title title-lg">Conclusiones</h2>
+      <p class="lede">Qué aprendimos</p>
+    </div>
+    <div class="s-body s9-body">
+      <ol class="s9-list">
+        <li>
+          <span class="s9-num">①</span>
+          <span class="s9-text">La <em>brecha de integralidad del 43%</em> confirma alta dificultad NP del SCP. El árbol de B&amp;B debe explorarse profundamente antes de converger.</span>
+        </li>
+        <li>
+          <span class="s9-num">②</span>
+          <span class="s9-text">El <em>operador de reparación en 2 fases</em> es el componente decisivo: sin él brecha 5–10%; con él brecha &lt; 2% (Beasley &amp; Chu, 1996).</span>
+        </li>
+        <li>
+          <span class="s9-num">③</span>
+          <span class="s9-text">El <em>AG con semilla 13</em> alcanzó el óptimo verdadero (<strong>$49,051</strong>) en 57 s, superando al ILP estándar que reportó $50,123 como <em>'Optimal'</em> por criterio de gap relativo.</span>
+        </li>
+        <li>
+          <span class="s9-num">④</span>
+          <span class="s9-text">La variabilidad del AG sobre 5 semillas es <strong>CV = 1.37%</strong>: estable y reproducible. Ninguna semilla supera el 3.6% de brecha.</span>
+        </li>
+        <li>
+          <span class="s9-num">⑤</span>
+          <span class="s9-text">La formulación SCP es directamente extensible al <em>HAM10000 completo</em> como trabajo futuro: construir la matriz de incidencia real desde las 10,015 imágenes.</span>
+        </li>
+      </ol>
+    </div>
+  </div>
+  <div class="notes">
+    <span class="notes-label">Notas · 60 s</span>
+    Cinco hallazgos. Enfatizar (③) que el solver mintió y (④) la estabilidad del AG. Cerrar abriendo la puerta al trabajo futuro: HAM10000 completo.
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     SLIDE 12 · CIERRE BURGUNDY ¡Gracias! · v2 PPTX
+════════════════════════════════════════════════════════ -->
+<section class="slide burgundy-slide" data-slide="12">
+  <div class="slide-inner s10-inner">
+    <div class="s10-header">
+      <h2 class="s10-thanks">¡Gracias!</h2>
+      <p class="s10-authors">María Paula Saavedra · Brayan Steven León</p>
+      <p class="s10-meta">Investigación de Operaciones · UNAB 2026</p>
+      <p class="s10-repo">github.com/Paulasaah/setcover-pau-brayan</p>
+    </div>
+    <div class="s10-grid">
+      <div class="s10-kpi">
+        <div class="s10-kpi-val">$49,051</div>
+        <div class="s10-kpi-lbl">Óptimo</div>
+      </div>
+      <div class="s10-kpi">
+        <div class="s10-kpi-val">|S*| = 22</div>
+        <div class="s10-kpi-lbl">subconjuntos</div>
+      </div>
+      <div class="s10-kpi">
+        <div class="s10-kpi-val">21×</div>
+        <div class="s10-kpi-lbl">AG más rápido</div>
+      </div>
+      <div class="s10-kpi">
+        <div class="s10-kpi-val">1.37%</div>
+        <div class="s10-kpi-lbl">CV</div>
+      </div>
+    </div>
+  </div>
+  <div class="notes">
+    <span class="notes-label">Notas · 30 s</span>
+    Cierre. Agradecer y abrir preguntas. Los 4 KPIs resumen el aporte: óptimo verdadero, tamaño de la solución, velocidad del AG y estabilidad multi-seed.
+  </div>
+</section>
+
+</div>
+
+<div class="dots" id="dots"></div>
+
+<nav class="nav">
+  <button id="prev" aria-label="Anterior">←</button>
+  <span class="counter"><span class="current" id="current">01</span> · <span id="total">10</span></span>
+  <button id="next" aria-label="Siguiente">→</button>
+</nav>
+
+<button class="toggle-notes" id="toggleNotes">Notas · N</button>
+
+<script>
+const TOTAL = 12;
+let current = 1;
+const slides = document.querySelectorAll('.slide');
+const progressEl = document.getElementById('progress');
+const currentEl = document.getElementById('current');
+const dotsContainer = document.getElementById('dots');
+
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Registro de instancias Chart.js para resize on slide reveal
+const chartInstances = [];
+
+// Easing premium expo.out
+const EXPO_OUT = 'cubic-bezier(0.16, 1, 0.3, 1)';
+
+// Quick-tweens para magnetic dots
+const dotMagnets = new Map();
+
+for (let i = 1; i <= TOTAL; i++) {
+  const dot = document.createElement('button');
+  dot.className = 'dot';
+  dot.dataset.slide = i;
+  dot.setAttribute('aria-label', `Diapositiva ${i}`);
+  dot.setAttribute('tabindex', '0');
+  dot.addEventListener('click', () => goTo(i));
+  dot.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      goTo(Number(dot.dataset.slide));
+    }
+  });
+  dotsContainer.appendChild(dot);
+
+  if (!reducedMotion && window.gsap && gsap.quickTo) {
+    dotMagnets.set(dot, {
+      x: gsap.quickTo(dot, 'x', { duration: 0.4, ease: 'power3.out' }),
+      y: gsap.quickTo(dot, 'y', { duration: 0.4, ease: 'power3.out' })
+    });
+  }
+}
+
+// Magnetic pull en dots laterales (skip si reduced motion)
+if (!reducedMotion && dotMagnets.size > 0) {
+  const MAG_RADIUS = 60;
+  const MAG_STRENGTH = 0.35;
+  window.addEventListener('mousemove', (e) => {
+    dotMagnets.forEach((tweens, dot) => {
+      const r = dot.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const dx = e.clientX - cx;
+      const dy = e.clientY - cy;
+      const dist = Math.hypot(dx, dy);
+      if (dist < MAG_RADIUS) {
+        tweens.x(dx * MAG_STRENGTH);
+        tweens.y(dy * MAG_STRENGTH);
+      } else {
+        tweens.x(0);
+        tweens.y(0);
+      }
+    });
+  }, { passive: true });
+}
+
+const mathOptions = {
+  delimiters: [
+    { left: '$$', right: '$$', display: true },
+    { left: '$', right: '$', display: false }
+  ],
+  throwOnError: false,
+  output: 'html'
+};
+
+function renderKatex(el) {
+  if (window.renderMathInElement) renderMathInElement(el, mathOptions);
+}
+
+// SplitType simulado: envuelve cada char en .char respetando <em>
+function animateTitle(titleEl) {
+  if (!titleEl) return;
+  if (titleEl.dataset.split) {
+    // Re-animar chars existentes sin volver a partir
+    const chars = titleEl.querySelectorAll('.char');
+    if (chars.length === 0) return;
+    gsap.fromTo(chars,
+      { yPercent: 100, opacity: 0 },
+      { yPercent: 0, opacity: 1, duration: 0.8, ease: 'expo.out', stagger: 0.018 }
+    );
+    return;
+  }
+  titleEl.dataset.split = '1';
+  // Walk DOM text nodes — preserves HTML entities (& renders as &, not &amp;)
+  // because we read decoded text via .nodeValue, not raw innerHTML string.
+  const walkAndSplit = (node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.nodeValue;
+      if (!text) return;
+      const frag = document.createDocumentFragment();
+      for (const c of text) {
+        if (c === ' ' || c === '\n' || c === '\t') {
+          frag.appendChild(document.createTextNode(c));
+        } else {
+          const span = document.createElement('span');
+          span.className = 'char';
+          span.style.display = 'inline-block';
+          span.style.willChange = 'transform';
+          span.textContent = c;
+          frag.appendChild(span);
+        }
+      }
+      node.parentNode.replaceChild(frag, node);
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      Array.from(node.childNodes).forEach(walkAndSplit);
+    }
+  };
+  Array.from(titleEl.childNodes).forEach(walkAndSplit);
+  const chars = titleEl.querySelectorAll('.char');
+  gsap.set(chars, { yPercent: 100, opacity: 0 });
+  gsap.to(chars, {
+    yPercent: 0, opacity: 1,
+    duration: 0.8, ease: 'expo.out',
+    stagger: 0.018,
+  });
+}
+
+function animateInner(slide) {
+  if (reducedMotion) return;
+  const inner = slide.querySelector('.slide-inner');
+  const titleEl = slide.querySelector('.title-xl, .title-lg, .title, .cover .left h1');
+  const headerEls = slide.querySelectorAll('.kicker, .lede, .cover .left .subline, .cover .right .subtitle');
+  const bodyEls = slide.querySelectorAll('.editorial li, .formula, table, .callout, pre.code, .chart-wrap, .defs > div, h3.label, .annotation, .authors, .session, .ornament, .footer-meta, .phase-card, .statement');
+  const cards = slide.querySelectorAll('.metric');
+
+  // Container enter: fade + scale + blur
+  gsap.fromTo(inner,
+    { opacity: 0, scale: 0.98, filter: 'blur(8px)' },
+    { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.7, ease: 'expo.out', clearProps: 'filter,transform' }
+  );
+
+  // Título char-by-char primero
+  if (titleEl) animateTitle(titleEl);
+
+  // Headers secundarios (kicker, lede, subtítulos)
+  if (headerEls.length > 0) {
+    gsap.fromTo(headerEls,
+      { opacity: 0, y: 18 },
+      {
+        opacity: 1, y: 0,
+        duration: 0.6,
+        stagger: 0.04,
+        ease: EXPO_OUT,
+        delay: 0.15,
+        clearProps: 'all'
+      }
+    );
+  }
+
+  // Body stagger general
+  if (bodyEls.length > 0) {
+    const bodyDelay = (titleEl || headerEls.length > 0) ? 0.35 : 0.08;
+    gsap.fromTo(bodyEls,
+      { opacity: 0, y: 14 },
+      {
+        opacity: 1, y: 0,
+        duration: 0.66,
+        stagger: 0.04,
+        ease: EXPO_OUT,
+        delay: bodyDelay,
+        clearProps: 'all'
+      }
+    );
+  }
+
+  // Parallax depth en metric cards
+  if (cards.length > 0) {
+    gsap.fromTo(cards,
+      { y: 20, opacity: 0, scale: 0.96 },
+      { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.4)', stagger: 0.06, delay: 0.3, clearProps: 'transform' }
+    );
+  }
+}
+
+function resizeCharts() {
+  chartInstances.forEach(ch => {
+    if (ch && typeof ch.resize === 'function') {
+      try { ch.resize(); } catch (_) { /* noop */ }
+    }
+  });
+}
+
+function goTo(n) {
+  if (n < 1 || n > TOTAL || n === current) return;
+  const prevSlide = document.querySelector(`.slide[data-slide="${current}"]`);
+  const nextSlide = document.querySelector(`.slide[data-slide="${n}"]`);
+  const prevInner = prevSlide.querySelector('.slide-inner');
+
+  if (reducedMotion) {
+    prevSlide.classList.remove('active');
+    gsap.set(prevSlide, { clearProps: 'all' });
+    nextSlide.classList.add('active');
+    gsap.set(nextSlide, { opacity: 1 });
+    renderKatex(nextSlide);
+    requestAnimationFrame(resizeCharts);
+  } else {
+    // Slide exit: scale-up + blur + fade
+    gsap.to(prevInner || prevSlide, {
+      opacity: 0, scale: 1.02, filter: 'blur(6px)',
+      duration: 0.4, ease: 'expo.in',
+      onComplete: () => {
+        prevSlide.classList.remove('active');
+        gsap.set(prevSlide, { clearProps: 'all' });
+        if (prevInner) gsap.set(prevInner, { clearProps: 'all' });
+        nextSlide.classList.add('active');
+        gsap.set(nextSlide, { opacity: 1 });
+        animateInner(nextSlide);
+        renderKatex(nextSlide);
+        // Forzar resize de charts una vez el slide es visible (sino el canvas mide 0)
+        requestAnimationFrame(resizeCharts);
+      }
+    });
+  }
+
+  current = n;
+
+  // Counter typewriter: fade-out → swap → fade-in
+  if (reducedMotion) {
+    currentEl.textContent = String(n).padStart(2, '0');
+  } else {
+    gsap.to(currentEl, {
+      opacity: 0, duration: 0.15,
+      onComplete: () => {
+        currentEl.textContent = String(n).padStart(2, '0');
+        gsap.to(currentEl, { opacity: 1, duration: 0.3 });
+      }
+    });
+  }
+
+  // Progress bar con easing (sin override de transition CSS)
+  if (reducedMotion) {
+    progressEl.style.width = `${(n / TOTAL) * 100}%`;
+  } else {
+    gsap.to(progressEl, {
+      width: `${(n / TOTAL) * 100}%`,
+      duration: 0.8,
+      ease: 'expo.out'
+    });
+  }
+
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i + 1 === n));
+}
+
+// Keyboard hint toast (primera visita por sesión)
+function showKeyboardHint() {
+  if (reducedMotion) return;
+  if (sessionStorage.getItem('kbHint')) return;
+  sessionStorage.setItem('kbHint', '1');
+  const hint = document.createElement('div');
+  hint.className = 'kb-hint';
+  hint.innerHTML = '← → navegar · <strong>N</strong> notas';
+  document.body.appendChild(hint);
+  gsap.fromTo(hint,
+    { opacity: 0, y: 12 },
+    { opacity: 1, y: 0, duration: 0.5, delay: 1.5, ease: 'expo.out' }
+  );
+  gsap.to(hint, {
+    opacity: 0, y: 12, duration: 0.4, delay: 6,
+    onComplete: () => hint.remove()
+  });
+}
+
+window.addEventListener('load', () => {
+  renderKatex(document.body);
+
+  slides[0].classList.add('active');
+  document.querySelector('.dot[data-slide="1"]').classList.add('active');
+  progressEl.style.width = `${(1 / TOTAL) * 100}%`;
+
+  animateInner(slides[0]);
+  buildCharts();
+  showKeyboardHint();
+});
+
+document.getElementById('prev').addEventListener('click', () => goTo(current - 1));
+document.getElementById('next').addEventListener('click', () => goTo(current + 1));
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); goTo(current + 1); }
+  if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); goTo(current - 1); }
+  if (e.key === 'Home') goTo(1);
+  if (e.key === 'End') goTo(TOTAL);
+  if (e.key.toLowerCase() === 'n') document.getElementById('toggleNotes').click();
+  if (e.key === 'Escape' && document.body.classList.contains('show-notes')) {
+    document.body.classList.remove('show-notes');
+  }
+});
+
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
+document.addEventListener('touchend', (e) => {
+  const dx = e.changedTouches[0].screenX - touchStartX;
+  if (Math.abs(dx) > 60) goTo(current + (dx < 0 ? 1 : -1));
+});
+
+document.getElementById('toggleNotes').addEventListener('click', () => {
+  document.body.classList.toggle('show-notes');
+});
+
+// Resize charts on window resize (debounced)
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(resizeCharts, 120);
+});
+
+function buildCharts() {
+  Chart.defaults.color = '#2d171799';
+  Chart.defaults.font.family = '"Times New Roman", Georgia, serif';
+  Chart.defaults.borderColor = '#2d17171a';
+
+  // Tooltip styling premium (reused across charts)
+  const premiumTooltip = {
+    enabled: true,
+    backgroundColor: 'rgba(45, 23, 23, 0.95)',
+    titleColor: '#f8e0e4',
+    bodyColor: '#faf6f3',
+    titleFont: { family: 'Times New Roman', size: 13, weight: 'normal', style: 'italic' },
+    bodyFont: { family: 'Times New Roman', size: 14 },
+    padding: 12,
+    cornerRadius: 4,
+    displayColors: false,
+    borderColor: '#e15269',
+    borderWidth: 1,
+    caretSize: 6
+  };
+
+  // Hover cursor pointer
+  const onHoverCursor = (e, els) => {
+    if (e && e.native && e.native.target) {
+      e.native.target.style.cursor = els && els.length ? 'pointer' : 'default';
+    }
+  };
+
+  // Entry animation premium con stagger (skip si reduced motion)
+  const chartAnim = reducedMotion
+    ? { duration: 0 }
+    : {
+        duration: 1200,
+        easing: 'easeOutQuart',
+        delay: ctx => (ctx.type === 'data' && ctx.mode === 'default') ? ctx.dataIndex * 80 : 0
+      };
+
+  // Plugin: datalabels manual encima de cada bar
+  const topLabelsPlugin = {
+    id: 'topLabels',
+    afterDatasetsDraw(chart, args, opts) {
+      const meta = chart.getDatasetMeta(0);
+      if (!meta || !meta.data || !meta.data.length) return;
+      const ds = chart.data.datasets[0];
+      if (!ds || !ds.data) return;
+      const ctx = chart.ctx;
+      ctx.save();
+      ctx.fillStyle = '#2d1717';
+      ctx.font = 'italic 11px "Times New Roman"';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ds.data.forEach((v, i) => {
+        const bar = meta.data[i];
+        if (!bar || typeof v !== 'number') return;
+        const x = bar.x;
+        const yPos = bar.y - 6;
+        const label = (opts && typeof opts.format === 'function')
+          ? opts.format(v)
+          : `$${(v / 1000).toFixed(1)}k`;
+        ctx.fillText(label, x, yPos);
+      });
+      ctx.restore();
+    }
+  };
+
+  // Plugin: marcador estrella sobre el bar óptimo
+  const optimumMarkerPlugin = {
+    id: 'optimumMarker',
+    afterDatasetsDraw(chart, args, opts) {
+      if (!opts || typeof opts.index !== 'number') return;
+      const meta = chart.getDatasetMeta(0);
+      if (!meta || !meta.data || !meta.data[opts.index]) return;
+      const bar = meta.data[opts.index];
+      const ctx = chart.ctx;
+      ctx.save();
+      ctx.fillStyle = opts.color || '#e15269';
+      ctx.font = 'italic 14px "Times New Roman"';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('★', bar.x, bar.y - 22);
+      ctx.restore();
+    }
+  };
+
+  // ============================================================
+  // Mutación adaptativa (Slide 4) — line chart con gradient fill
+  // ============================================================
+  const gens = Array.from({ length: 21 }, (_, i) => i * 25); // 0, 25, ..., 500
+  const pmVals = gens.map(g => 0.030 + (0.005 - 0.030) * (g) / 499);
+
+  const mutCanvas = document.getElementById('mutChart');
+  const mutCtx2d = mutCanvas.getContext('2d');
+  // Gradient burgundy → transparent bajo la línea (alto fijo para garantizar visibilidad)
+  const mutGradient = mutCtx2d.createLinearGradient(0, 0, 0, 260);
+  mutGradient.addColorStop(0, 'rgba(102, 18, 31, 0.38)');
+  mutGradient.addColorStop(1, 'rgba(102, 18, 31, 0.02)');
+
+  // Plugin: anotaciones de inicio/fin de p_m sobre el line chart
+  const mutEndpointsPlugin = {
+    id: 'mutEndpoints',
+    afterDatasetsDraw(chart) {
+      const meta = chart.getDatasetMeta(0);
+      if (!meta || !meta.data || meta.data.length < 2) return;
+      const first = meta.data[0];
+      const last = meta.data[meta.data.length - 1];
+      const ctx = chart.ctx;
+      ctx.save();
+      ctx.font = 'italic 11px "Times New Roman"';
+      ctx.fillStyle = '#66121f';
+      // Inicio: exploración
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('p_m₀ = 0.030 · exploración', first.x + 8, first.y - 6);
+      // Fin: refinamiento
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'top';
+      ctx.fillText('p_m∞ = 0.005 · refinamiento', last.x - 8, last.y + 8);
+      ctx.restore();
+    }
+  };
+
+  chartInstances.push(new Chart(mutCanvas, {
+    type: 'line',
+    data: {
+      labels: gens,
+      datasets: [{
+        label: 'p_m(g)',
+        data: pmVals,
+        borderColor: '#66121f',
+        backgroundColor: mutGradient,
+        fill: true,
+        tension: 0.05,
+        pointRadius: 3,
+        pointHoverRadius: 9,
+        pointHoverBackgroundColor: '#e15269',
+        pointHoverBorderColor: '#faf6f3',
+        pointHoverBorderWidth: 2,
+        pointBackgroundColor: '#e15269',
+        borderWidth: 2.5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: chartAnim,
+      layout: { padding: { top: 16, right: 16, bottom: 4, left: 4 } },
+      interaction: { mode: 'index', intersect: false },
+      onHover: onHoverCursor,
+      plugins: {
+        legend: { display: false },
+        title: {
+          display: true,
+          text: 'Decaimiento lineal de la mutación adaptativa',
+          font: { size: 12, family: 'Times New Roman', style: 'italic' },
+          color: '#66121f',
+          padding: { top: 0, bottom: 8 }
+        },
+        tooltip: {
+          ...premiumTooltip,
+          callbacks: {
+            title: items => items && items.length ? `Generación g = ${items[0].label}` : '',
+            label: ctx => `p_m = ${ctx.parsed.y.toFixed(4)}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Generación (g)',
+            font: { family: 'Times New Roman', size: 12, style: 'italic' },
+            color: '#66121f',
+            padding: { top: 4 }
+          },
+          ticks: { font: { family: 'Times New Roman', size: 11 }, maxRotation: 0, autoSkipPadding: 12 },
+          grid: { color: '#2d17170a' }
+        },
+        y: {
+          min: 0.000,
+          max: 0.035,
+          ticks: {
+            stepSize: 0.005,
+            callback: v => v.toFixed(3),
+            font: { family: 'Times New Roman', size: 11 }
+          },
+          title: {
+            display: true,
+            text: 'p_m (probabilidad de mutación)',
+            font: { family: 'Times New Roman', size: 12, style: 'italic' },
+            color: '#66121f',
+            padding: { bottom: 4 }
+          },
+          grid: { color: '#2d17170a' }
+        }
+      }
+    },
+    plugins: [mutEndpointsPlugin]
+  }));
+
+  // ============================================================
+  // Resultados (Slide 6) — bar chart con datalabels + marcador óptimo
+  // Paleta: LP relax=ink-30, Greedy=ink-50, ILP est.=rose, AG=burgundy, ILP ref.=green
+  // AG s.13 (idx 3) destacado: borde rosa + hover saturado + ★
+  // ============================================================
+  chartInstances.push(new Chart(document.getElementById('resultsChart'), {
+    type: 'bar',
+    data: {
+      labels: ['LP relax', 'Greedy', 'ILP est.', 'AG s.13', 'ILP ref.'],
+      datasets: [{
+        label: 'Costo ($)',
+        data: [27860, 52063, 50123, 49051, 49051],
+        backgroundColor: ['#bfa9a9', '#8a6e6e', '#e15269', '#66121f', '#4a7c59'],
+        hoverBackgroundColor: ['#a89393', '#6f5757', '#d63d56', '#4a0c16', '#3a6347'],
+        borderRadius: 4,
+        borderSkipped: false,
+        borderColor: ['transparent', 'transparent', 'transparent', '#e15269', '#2d4a36'],
+        borderWidth: [0, 0, 0, 2.5, 1.5],
+        barPercentage: 0.72,
+        categoryPercentage: 0.78
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: chartAnim,
+      layout: { padding: { top: 28, right: 12, bottom: 4, left: 4 } },
+      hover: { mode: 'index', intersect: false },
+      onHover: onHoverCursor,
+      plugins: {
+        legend: { display: false },
+        title: {
+          display: true,
+          text: 'Costo por método · óptimo certificado $49,051',
+          font: { family: 'Times New Roman', size: 12, style: 'italic' },
+          color: '#66121f',
+          padding: { top: 0, bottom: 6 }
+        },
+        tooltip: {
+          ...premiumTooltip,
+          callbacks: {
+            title: items => items && items.length ? items[0].label : '',
+            label: ctx => `$${ctx.parsed.y.toLocaleString()}`,
+            afterLabel: ctx => {
+              const labels = ['cota inferior (LP)', 'heurística golosa', 'ILP estándar', '★ AG seed 13', '✓ óptimo certificado'];
+              return labels[ctx.dataIndex] || '';
+            }
+          }
+        },
+        topLabels: { format: v => `$${v.toLocaleString()}` },
+        optimumMarker: { index: 3, color: '#e15269' }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 11, family: 'Times New Roman' } },
+          title: {
+            display: true,
+            text: 'Método',
+            font: { family: 'Times New Roman', size: 12, style: 'italic' },
+            color: '#66121f',
+            padding: { top: 4 }
+          }
+        },
+        y: {
+          beginAtZero: false,
+          min: 25000,
+          max: 56000,
+          ticks: {
+            callback: v => `$${(v / 1000).toFixed(0)}k`,
+            font: { size: 11, family: 'Times New Roman' },
+            stepSize: 5000
+          },
+          grid: { color: '#2d17170a' },
+          title: {
+            display: true,
+            text: 'Costo total ($)',
+            font: { family: 'Times New Roman', size: 12, style: 'italic' },
+            color: '#66121f',
+            padding: { bottom: 4 }
+          }
+        }
+      }
+    },
+    plugins: [topLabelsPlugin, optimumMarkerPlugin]
+  }));
+
+  // ============================================================
+  // Robustez multi-seed (Slide 8) — bar + línea óptimo animada delay
+  // s.13 (idx 1) destacado con borde rosa + ★
+  // ============================================================
+  // Plugin: etiqueta textual "óptimo $49,051" pegada a la línea dashed
+  const optimumLineLabelPlugin = {
+    id: 'optimumLineLabel',
+    afterDatasetsDraw(chart, args, opts) {
+      const datasetIndex = (opts && typeof opts.datasetIndex === 'number') ? opts.datasetIndex : 1;
+      const meta = chart.getDatasetMeta(datasetIndex);
+      if (!meta || !meta.data || !meta.data.length) return;
+      const lastPoint = meta.data[meta.data.length - 1];
+      if (!lastPoint) return;
+      const ctx = chart.ctx;
+      ctx.save();
+      ctx.font = 'italic 11px "Times New Roman"';
+      ctx.fillStyle = (opts && opts.color) || '#e15269';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'bottom';
+      const label = (opts && opts.text) || 'óptimo $49,051';
+      ctx.fillText(label, lastPoint.x - 4, lastPoint.y - 4);
+      ctx.restore();
+    }
+  };
+
+  chartInstances.push(new Chart(document.getElementById('robustChart'), {
+    type: 'bar',
+    data: {
+      labels: ['s.7', 's.13', 's.21', 's.42', 's.99'],
+      datasets: [{
+        label: 'Costo ($)',
+        data: [50118, 49051, 50392, 50762, 50832],
+        backgroundColor: ['#8a6e6e', '#66121f', '#8a6e6e', '#8a6e6e', '#8a6e6e'],
+        hoverBackgroundColor: ['#6f5757', '#4a0c16', '#6f5757', '#6f5757', '#6f5757'],
+        borderRadius: 4,
+        borderSkipped: false,
+        borderColor: ['transparent', '#e15269', 'transparent', 'transparent', 'transparent'],
+        borderWidth: [0, 2.5, 0, 0, 0],
+        barPercentage: 0.7,
+        categoryPercentage: 0.78
+      }, {
+        label: 'Óptimo certificado ($49,051)',
+        data: [49051, 49051, 49051, 49051, 49051],
+        type: 'line',
+        borderColor: '#e15269',
+        borderDash: [10, 5],
+        borderWidth: 2.5,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        fill: false,
+        // entrada animada con delay tras las bars
+        animation: reducedMotion ? { duration: 0 } : {
+          duration: 900,
+          easing: 'easeOutCubic',
+          delay: 600
+        }
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: chartAnim,
+      layout: { padding: { top: 36, right: 14, bottom: 4, left: 4 } },
+      hover: { mode: 'index', intersect: false },
+      onHover: onHoverCursor,
+      plugins: {
+        legend: { position: 'top', labels: { padding: 8, font: { size: 10, family: 'Times New Roman' }, boxWidth: 16 } },
+        title: {
+          display: true,
+          text: 'Robustez multi-seed · AG converge al óptimo con seed 13',
+          font: { family: 'Times New Roman', size: 12, style: 'italic' },
+          color: '#66121f',
+          padding: { top: 0, bottom: 6 }
+        },
+        tooltip: {
+          ...premiumTooltip,
+          filter: ti => ti.datasetIndex === 0,
+          callbacks: {
+            title: items => items && items.length ? `Seed ${items[0].label.replace('s.', '')}` : '',
+            label: ctx => `$${ctx.parsed.y.toLocaleString()}`,
+            afterLabel: ctx => {
+              const gap = ctx.parsed.y - 49051;
+              return gap === 0 ? '★ óptimo' : `Δ = +$${gap.toLocaleString()}`;
+            }
+          }
+        },
+        topLabels: { format: v => `$${v.toLocaleString()}` },
+        optimumMarker: { index: 1, color: '#e15269' },
+        optimumLineLabel: { datasetIndex: 1, color: '#e15269', text: 'óptimo $49,051' }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 11, family: 'Times New Roman' } },
+          title: {
+            display: true,
+            text: 'Semilla del AG',
+            font: { family: 'Times New Roman', size: 12, style: 'italic' },
+            color: '#66121f',
+            padding: { top: 4 }
+          }
+        },
+        y: {
+          min: 48500,
+          max: 51400,
+          ticks: {
+            callback: v => `$${(v / 1000).toFixed(1)}k`,
+            font: { size: 11, family: 'Times New Roman' },
+            stepSize: 500
+          },
+          grid: { color: '#2d17170a' },
+          title: {
+            display: true,
+            text: 'Costo total ($)',
+            font: { family: 'Times New Roman', size: 12, style: 'italic' },
+            color: '#66121f',
+            padding: { bottom: 4 }
+          }
+        }
+      }
+    },
+    plugins: [topLabelsPlugin, optimumMarkerPlugin, optimumLineLabelPlugin]
+  }));
+}
+</script>
+
+</body>
+</html>

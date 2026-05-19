@@ -1,37 +1,25 @@
+# Backups
+**/*.backup-*
+**/*.bak
+
 # Python
 __pycache__/
-*.py[cod]
-*$py.class
+*.pyc
 .venv/
-venv/
-env/
-.Python
 *.egg-info/
 
-# Editor
+# IDE
 .vscode/
 .idea/
-*.swp
-*.swo
-
-# Logs / cache
-_*.log.txt
-results/_*.txt
-.pytest_cache/
-ruvector.db
-*.db-journal
 
 # OS
 .DS_Store
 Thumbs.db
 
-# LaTeX build artifacts
-paper/*.aux
-paper/*.bbl
-paper/*.blg
-paper/*.log
-paper/*.out
-paper/*.toc
-paper/*.synctex.gz
-paper/*.fls
-paper/*.fdb_latexmk
+# Generated artifacts (keep PDF, exclude work files)
+docs/presentation/*.backup*
+/tmp/
+
+# Database
+*.db
+ruvector.db
